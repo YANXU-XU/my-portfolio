@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "启动 Stickman Motion Simulator",
+			"type": "shell",
+			"command": "npx.cmd",
+			"args": [
+				"--yes",
+				"http-server",
+				".",
+				"-p",
+				"5500",
+				"-c-1"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
