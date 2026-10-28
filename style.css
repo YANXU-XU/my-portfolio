@@ -249,16 +249,92 @@ h1,h2,h3,p { margin-top:0; } h1 { font-size:clamp(2.6rem,6vw,5.3rem); letter-spa
     width:min(48%, 34rem);
   }
   .bubble-nav {
-    bottom:2%;
+    display:block;
+    inset:0;
   }
   .bubble {
     height:clamp(5.8rem, 9vw, 6.5rem);
+    position:absolute;
     width:clamp(5.8rem, 9vw, 6.5rem);
   }
+  .bubble-simulator { left:8%; top:28%; }
+  .bubble-gallery { left:18%; top:52%; }
+  .bubble-about { right:8%; top:25%; }
+  .bubble-note { bottom:auto; left:auto; right:18%; top:49%; }
+  .bubble-note-two { bottom:auto; left:auto; right:7%; top:70%; }
   .home-dialogue {
     bottom:auto;
     left:auto;
     right:5%;
     top:2rem;
+  }
+}
+
+@media (max-width:700px) {
+  .home-canvas {
+    min-height:760px;
+  }
+  .portrait-wrap {
+    top:11%;
+    transform:translateX(-50%);
+    width:min(15rem, 56vw);
+  }
+  .portrait-wrap h1 {
+    bottom:-3.2rem;
+    font-size:clamp(1.9rem, 9vw, 2.45rem);
+    left:50%;
+    text-align:center;
+    transform:translateX(-50%);
+    width:15rem;
+  }
+  .portrait-label {
+    left:50%;
+    top:10%;
+    transform:translateX(-50%) rotate(-8deg);
+    white-space:nowrap;
+  }
+  .bubble-nav {
+    display:block;
+    inset:0;
+  }
+  .bubble {
+    height:clamp(4.5rem, 19vw, 5.2rem);
+    padding:.75rem;
+    position:absolute;
+    width:clamp(4.5rem, 19vw, 5.2rem);
+  }
+  .bubble strong {
+    font-size:.65rem;
+  }
+  .bubble i {
+    font-size:.85rem;
+  }
+  .bubble-simulator {
+    left:.25rem;
+    top:25%;
+  }
+  .bubble-gallery {
+    left:.25rem;
+    top:47%;
+  }
+  .bubble-about {
+    right:.25rem;
+    top:21%;
+  }
+  .bubble-note {
+    right:.25rem;
+    top:40%;
+  }
+  .bubble-note-two {
+    right:.25rem;
+    top:59%;
+    transform:none;
+  }
+  .home-dialogue {
+    bottom:1.25rem;
+    left:1.25rem;
+    right:1.25rem;
+    top:auto;
+    width:auto;
   }
 }
