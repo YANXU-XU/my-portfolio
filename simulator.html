@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulator | Stickman Motion Simulator</title>
+  <meta name="description" content="Click the stage to switch between seven stickman motions.">
+  <meta name="theme-color" content="#f5f8ff">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Stickman Motion Simulator">
+  <meta property="og:description" content="Click anywhere on the stage to switch a stickman motion.">
+  <meta property="og:url" content="https://example.com/stickman-motion-simulator/simulator.html">
+  <meta property="og:image" content="https://example.com/stickman-motion-simulator/og-image.svg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235b6ee1'/%3E%3Ccircle cx='32' cy='18' r='7' fill='white'/%3E%3Cpath d='M32 27v18M20 35l12 5 12-5M24 56l8-11 8 11' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
+    <nav aria-label="Primary navigation">
+      <a href="index.html">Home</a><a class="is-active" href="simulator.html">Simulator</a><a href="gallery.html">Motion Gallery</a><a href="about.html">About</a>
+    </nav>
+  </header>
+  <main class="page-shell simulator-page">
+    <section class="section-heading" aria-labelledby="sim-title">
+      <p class="eyebrow">Interactive motion lab</p>
+      <h1 id="sim-title">Find a new rhythm.</h1>
+      <p>Click anywhere on the stage to switch the pose. Every change is a small study in timing and balance.</p>
+    </section>
+    <section class="simulator-layout" aria-label="Stickman motion simulator">
+      <article class="stage-card">
+        <button id="motion-stage" class="motion-stage" type="button" aria-label="Change stickman motion">
+          <span class="stage-grid" aria-hidden="true"></span>
+          <span id="motion-badge" class="motion-badge">01 / 07</span>
+          <svg id="stickman" class="stickman-svg simulator-stickman" viewBox="0 0 300 340" role="img" aria-labelledby="motion-name motion-instruction">
+            <circle class="svg-skin" cx="150" cy="70" r="31"/>
+            <g id="motion-pose" class="motion-pose">
+              <rect fill="#2148d8" x="136" y="106" width="28" height="111"/>
+              <path fill="#f04438" d="M136 125 82 159l10 17 44-23zM164 125l54 34-10 17-44-23z"/>
+              <path fill="#58c637" d="m136 210-38 78 18 9 48-70zM164 210l38 78-18 9-48-70z"/>
+              <rect fill="#8b42d8" x="78" y="288" width="34" height="12"/>
+              <rect fill="#ff8a26" x="198" y="288" width="34" height="12"/>
+            </g>
+          </svg>
+          <span id="motion-instruction" class="stage-hint">Click the stage to move</span>
+        </button>
+        <div class="motion-status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span>Current motion: <strong id="motion-name">Stand</strong></span>
+        </div>
+        <p class="dialogue" aria-live="polite"><span>VOICE NOTE</span><strong id="motion-dialogue">“Just hanging around, admiring the art.”</strong></p>
+      </article>
+      <aside class="control-card">
+        <p class="eyebrow">Motion sequence</p>
+        <h2>Seven ways to move</h2>
+        <ol id="motion-list" class="motion-list">
+          <li class="is-selected"><span>01</span> Stand</li><li><span>02</span> Walk</li><li><span>03</span> Run</li><li><span>04</span> Jump</li><li><span>05</span> Wave</li><li><span>06</span> Squat</li><li><span>07</span> Swim</li>
+        </ol>
+        <p class="tip"><span aria-hidden="true">↗</span> Tip: clicking quickly can create your own animation sequence.</p>
+        <p class="auto-status"><span class="auto-dot"></span> Auto tour is on · next pose in <strong id="countdown">4</strong>s</p>
+      </aside>
+    </section>
+  </main>
+  <footer class="site-footer page-shell"><p>Move lightly. Observe closely.</p><p>© 2026 Stickman Motion Simulator</p></footer>
+  <script src="script.js"></script>
+</body>
+</html>

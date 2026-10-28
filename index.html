@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stickman Motion Simulator | Home</title>
+  <meta name="description" content="A bright, playful home for exploring stickman movement.">
+  <meta name="theme-color" content="#ffd21f">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Stickman Motion Simulator">
+  <meta property="og:description" content="Explore movement through bright color-block portraits and playful motion studies.">
+  <meta property="og:url" content="https://example.com/stickman-motion-simulator/">
+  <meta property="og:image" content="https://example.com/stickman-motion-simulator/og-image.svg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%232148d8'/%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ffd21f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="home-page">
+  <main class="home-canvas">
+    <p class="home-kicker">Stickman Motion · a tiny movement museum</p>
+    <p class="home-counter">01 / 04</p>
+
+    <section class="portrait-wrap" aria-labelledby="home-title">
+      <p class="portrait-label">Hello, mover!</p>
+      <svg class="portrait" viewBox="0 0 520 580" role="img" aria-labelledby="portrait-title portrait-desc">
+        <title id="portrait-title">A bright color-block portrait</title>
+        <desc id="portrait-desc">A playful head made from cobalt blue, tomato red, orange, green, purple, and yellow shapes.</desc>
+        <path fill="#2148d8" d="M92 235C85 105 170 34 286 42c115 8 162 95 137 196-36-38-70-51-118-47-77 6-133 41-213 44z"/>
+        <path fill="#f04438" d="M92 188c49-20 92-58 102-117 51 24 113 31 173 17 2 50 24 94 74 119-5 80-60 145-150 145-111 0-177-61-199-164z"/>
+        <circle fill="#ffb58a" cx="265" cy="271" r="143"/>
+        <path fill="#ff8a26" d="M130 273c18-43 44-68 78-83 42 46 92 61 162 42 20 29 29 63 26 101-26-49-69-81-126-88-46 33-84 50-140 55z"/>
+        <circle fill="#10152f" cx="212" cy="273" r="14"/><circle fill="#10152f" cx="323" cy="273" r="14"/>
+        <path fill="#2148d8" d="M223 330c30 29 62 29 92-1-8 54-76 66-92 1z"/>
+        <path fill="#58c637" d="M72 405h158v125H72z"/><path fill="#8b42d8" d="M302 405h156v125H302z"/>
+        <path fill="#ffd21f" d="M190 384h150v55H190z"/><circle fill="#ffd21f" cx="80" cy="390" r="30"/>
+        <circle fill="#2148d8" cx="447" cy="383" r="31"/><path fill="#f04438" d="M228 485h80v45h-80z"/>
+      </svg>
+      <h1 id="home-title">Find your<br><span>funny walk.</span></h1>
+    </section>
+
+    <nav class="bubble-nav" aria-label="Explore the project">
+      <a class="bubble bubble-blue bubble-simulator" href="simulator.html">Try it<br><strong>Simulator</strong><i aria-hidden="true">↗</i></a>
+      <a class="bubble bubble-purple bubble-gallery" href="gallery.html">See the<br><strong>Gallery</strong><i aria-hidden="true">↗</i></a>
+      <a class="bubble bubble-green bubble-about" href="about.html">Meet the<br><strong>Project</strong><i aria-hidden="true">↗</i></a>
+      <button class="bubble bubble-red bubble-note" type="button" data-message="Six simple poses. Infinite little stories.">What is<br><strong>this?</strong><i aria-hidden="true">+</i></button>
+      <button class="bubble bubble-orange bubble-note bubble-note-two" type="button" data-message="Click a pose, watch it change, and make the web feel alive.">How to<br><strong>play</strong><i aria-hidden="true">+</i></button>
+    </nav>
+
+    <aside id="home-dialogue" class="home-dialogue" aria-live="polite">
+      <span>VOICE NOTE</span>
+      <strong>“Every body has a rhythm.”</strong>
+    </aside>
+    <p class="home-footer">A student-made visual experiment<br>in HTML · CSS · SVG · JavaScript</p>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

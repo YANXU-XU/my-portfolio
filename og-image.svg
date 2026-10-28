@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Stickman Motion Simulator</title>
+  <description id="description">A playful visual study of movement.</description>
+  <rect width="1200" height="630" fill="#f5f8ff"/>
+  <circle cx="930" cy="320" r="220" fill="#dff7ef"/>
+  <path d="M930 190v180M930 235L820 165M930 235l110-90M930 370l-105 125M930 370l110 110M820 165l-48 40M1040 145l48-45M825 495h-55M1040 480h60" fill="none" stroke="#18213d" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+  <circle cx="930" cy="125" r="50" fill="#ffcfb7" stroke="#18213d" stroke-width="12"/>
+  <text x="90" y="235" fill="#5b6ee1" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="5">A TINY LABORATORY FOR MOVEMENT</text>
+  <text x="90" y="325" fill="#18213d" font-family="Arial, sans-serif" font-size="72" font-weight="800">Stickman</text>
+  <text x="90" y="405" fill="#5b6ee1" font-family="Arial, sans-serif" font-size="72" font-weight="800">Motion Simulator</text>
+  <text x="90" y="475" fill="#69728d" font-family="Arial, sans-serif" font-size="23">Explore six expressive poses with one click.</text>
+</svg>
