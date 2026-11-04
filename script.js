@@ -26,8 +26,12 @@ if (stage) {
   let seconds = 4;
   let isTourPaused = false;
   let timer;
+  stage.dataset.motion = motions[0].name.toLowerCase();
 
   function showMotion(nextIndex) {
+    stage.classList.remove('stage-burst');
+    void stage.offsetWidth;
+    stage.classList.add('stage-burst');
     pose.classList.add('is-changing');
     window.setTimeout(() => {
       pose.innerHTML = motions[nextIndex].art.replaceAll('#ff8a26', '#ff8a26');
@@ -35,6 +39,7 @@ if (stage) {
       pose.classList.add('is-new');
       window.setTimeout(() => pose.classList.remove('is-new'), 400);
       current = nextIndex;
+      stage.dataset.motion = motions[current].name.toLowerCase();
       name.textContent = motions[current].name;
       dialogue.textContent = motions[current].dialogue;
       badge.textContent = `${String(current + 1).padStart(2, '0')} / 07`;
@@ -105,6 +110,8 @@ if (stage) {
 
 const homeDialogue = document.querySelector('#home-dialogue');
 const homeNotes = [...document.querySelectorAll('.home-page .bubble-note')];
+const homePortrait = document.querySelector('#home-portrait');
+const portraitMoodButton = document.querySelector('#portrait-mood');
 if (homeDialogue && homeNotes.length) {
   const homeMessage = homeDialogue.querySelector('strong');
   homeNotes.forEach((note) => {
@@ -118,10 +125,82 @@ if (homeDialogue && homeNotes.length) {
   });
 }
 
+if (homePortrait) {
+  const moods = [
+    ['mood-happy', '“A little bounce makes a big entrance.”'],
+    ['mood-surprised', '“Oh! You found the hidden mood button.”'],
+    ['mood-sleepy', '“Even movers need a tiny pause.”']
+  ];
+  let moodIndex = 0;
+
+  function changePortraitMood(event) {
+    const [moodClass, message] = moods[moodIndex];
+    moods.forEach(([className]) => homePortrait.classList.remove(className));
+    homePortrait.classList.add(moodClass, 'is-reacting');
+    window.setTimeout(() => homePortrait.classList.remove('is-reacting'), 500);
+    if (homeDialogue) {
+      homeDialogue.classList.add('is-changing');
+      window.setTimeout(() => {
+        homeDialogue.querySelector('strong').textContent = message;
+        homeDialogue.classList.remove('is-changing');
+      }, 180);
+    }
+    if (!event?.target.closest('button') && typeof playUiSound === 'function') playUiSound();
+    spawnHomeBubbles();
+    moodIndex = (moodIndex + 1) % moods.length;
+  }
+
+  homePortrait.addEventListener('click', changePortraitMood);
+  homePortrait.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      changePortraitMood();
+    }
+  });
+  portraitMoodButton?.addEventListener('click', changePortraitMood);
+
+  document.querySelector('.home-canvas').addEventListener('pointermove', (event) => {
+    const rect = homePortrait.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - .5) * 8;
+    const y = ((event.clientY - rect.top) / rect.height - .5) * 8;
+    homePortrait.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  });
+  document.querySelector('.home-canvas').addEventListener('pointerleave', () => {
+    homePortrait.style.transform = 'translate3d(0, 0, 0)';
+  });
+}
+
+function spawnHomeBubbles() {
+  const canvas = document.querySelector('.home-canvas');
+  if (!canvas) return;
+  const colors = ['var(--cobalt)', 'var(--tomato)', 'var(--purple)', 'var(--green)', 'var(--orange)'];
+  for (let index = 0; index < 8; index += 1) {
+    const bubble = document.createElement('span');
+    bubble.className = 'machine-bubble';
+    bubble.style.setProperty('--bubble-size', `${10 + Math.random() * 18}px`);
+    bubble.style.setProperty('--bubble-x', `${42 + Math.random() * 16}%`);
+    bubble.style.setProperty('--bubble-y', `${35 + Math.random() * 25}%`);
+    bubble.style.background = colors[index % colors.length];
+    bubble.addEventListener('animationend', () => bubble.remove(), { once: true });
+    canvas.appendChild(bubble);
+  }
+}
+
 const soundToggle = document.querySelector('#sound-toggle');
 const galleryCards = [...document.querySelectorAll('.motion-card')];
 let soundEnabled = true;
 let audioContext;
+
+document.querySelectorAll('.motion-card').forEach((card) => {
+  if (!card.querySelector('.motion-play')) {
+    const button = document.createElement('button');
+    button.className = 'motion-play';
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.textContent = 'Play motion';
+    card.appendChild(button);
+  }
+});
 
 function getAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -205,5 +284,21 @@ galleryCards.forEach((card) => {
     playButton.setAttribute('aria-pressed', String(isPlaying));
     playButton.textContent = isPlaying ? 'Pause motion' : 'Play motion';
     if (isPlaying) playMotionSound(card.dataset.motion);
+  });
+
+  document.querySelectorAll('.about-interactive .panel-action').forEach((button) => {
+    button.dataset.label = button.textContent;
+    button.addEventListener('click', () => {
+      const panel = button.closest('.about-panel');
+      const active = panel.classList.toggle('is-activated');
+      button.textContent = active ? 'Reset moment' : button.dataset.label || button.textContent;
+      panel.style.setProperty('--tilt', `${(Math.random() * 6 - 3).toFixed(1)}deg`);
+      if (active) {
+        panel.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.025) rotate(var(--tilt))' }, { transform: 'scale(1)' }],
+          { duration: 500, easing: 'cubic-bezier(.2,1.4,.4,1)' }
+        );
+      }
+    });
   });
 });

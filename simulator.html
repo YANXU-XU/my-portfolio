@@ -18,7 +18,7 @@
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
     <nav aria-label="Primary navigation">
-      <a href="index.html">Home</a><a class="is-active" href="simulator.html">Simulator</a><a href="gallery.html">Motion Gallery</a><a href="about.html">About</a>
+      <a href="index.html">Home</a><a class="is-active" href="simulator.html">Simulator</a><a href="gallery.html">Motion Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a>
     </nav>
   </header>
   <main class="page-shell simulator-page">
@@ -48,16 +48,18 @@
           <span class="status-dot"></span>
           <span>Current motion: <strong id="motion-name">Stand</strong></span>
         </div>
-        <p class="dialogue" aria-live="polite"><span>VOICE NOTE</span><strong id="motion-dialogue">“Just hanging around, admiring the art.”</strong></p>
+        <p class="dialogue" aria-live="polite"><span>VOICE NOTE</span><strong id="motion-dialogue">“Just hanging around, admiring the art.”</strong></p><div class="stage-progress" aria-hidden="true"><span id="motion-progress"></span></div>
       </article>
       <aside class="control-card">
         <p class="eyebrow">Motion sequence</p>
         <h2>Seven ways to move</h2>
         <ol id="motion-list" class="motion-list">
-          <li class="is-selected"><span>01</span> Stand</li><li><span>02</span> Walk</li><li><span>03</span> Run</li><li><span>04</span> Jump</li><li><span>05</span> Wave</li><li><span>06</span> Squat</li><li><span>07</span> Swim</li>
+          <li class="is-selected" tabindex="0" role="button" aria-current="true"><span>01</span> Stand</li><li tabindex="0" role="button"><span>02</span> Walk</li><li tabindex="0" role="button"><span>03</span> Run</li><li tabindex="0" role="button"><span>04</span> Jump</li><li tabindex="0" role="button"><span>05</span> Wave</li><li tabindex="0" role="button"><span>06</span> Squat</li><li tabindex="0" role="button"><span>07</span> Swim</li>
         </ol>
+        <div class="motion-controls" aria-label="Playback controls"><button id="tour-toggle" class="control-button" type="button" aria-pressed="false">Pause tour</button><button id="next-motion" class="control-button control-button-primary" type="button">Next pose →</button></div>
+        <label class="tempo-control" for="tempo-select">Tour tempo<select id="tempo-select"><option value="6">Slow · 6 sec</option><option value="4" selected>Balanced · 4 sec</option><option value="2">Quick · 2 sec</option></select></label>
         <p class="tip"><span aria-hidden="true">↗</span> Tip: clicking quickly can create your own animation sequence.</p>
-        <p class="auto-status"><span class="auto-dot"></span> Auto tour is on · next pose in <strong id="countdown">4</strong>s</p>
+        <p class="auto-status"><span class="auto-dot"></span> <span id="tour-status">Auto tour is on</span> · next pose in <strong id="countdown">4</strong>s</p>
       </aside>
     </section>
   </main>

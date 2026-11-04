@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Find your funny walk favicon">
+  <rect width="32" height="32" fill="#2148d8"/>
+  <circle cx="16" cy="16" r="9" fill="#ffd12f"/>
+  <path fill="#f04438" d="M8 15c1-7 5-10 10-9 4 1 6 4 6 8-3-2-5-3-8-2-3 0-5 2-8 3z"/>
+  <circle cx="13" cy="16" r="1.5" fill="#10152f"/>
+  <circle cx="19" cy="16" r="1.5" fill="#10152f"/>
+  <path fill="#f04438" d="M13 21c2 2 4 2 6 0-1 4-5 4-6 0z"/>
+</svg>
