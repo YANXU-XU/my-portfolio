@@ -29,52 +29,80 @@
         </div>
         <div id="animator-stage" class="animator-stage animator-stage-v2">
           <div class="stage-grid-lines" aria-hidden="true"></div>
-          <span class="stage-label">CONNECTED RIG</span>
-          <svg id="editor-stickman" class="editor-stickman editor-stickman-v2" viewBox="0 0 360 470" role="img" aria-labelledby="editor-title editor-desc">
+          <span class="stage-label">SIDE-VIEW RIG</span>
+          <svg id="editor-stickman" class="editor-stickman editor-stickman-v2" viewBox="0 0 360 440" preserveAspectRatio="xMidYMax meet" role="img" aria-labelledby="editor-title editor-desc">
             <title id="editor-title">Connected stickman skeleton</title>
-            <desc id="editor-desc">A connected skeleton with selectable head, torso, upper limbs, forearms, thighs, and shins.</desc>
-            <g id="editor-character" transform="translate(180 180)">
-              <g class="rig-part" data-part="torso" data-angle="0" data-base="">
-                <rect class="rig-torso" x="-20" y="-68" width="40" height="136" rx="16"></rect><rect class="rig-pick" data-pick="torso" x="-28" y="-72" width="56" height="144"></rect>
-              </g>
-              <g class="rig-part" data-part="head" data-angle="0" data-base="translate(0 -105)">
-                <circle class="rig-head" r="34"></circle><circle class="rig-anchor" r="5"></circle><circle class="rig-pick" data-pick="head" r="40"></circle>
-              </g>
-              <g class="rig-chain" data-chain="left-arm" transform="translate(-22 -55)">
-                <g class="rig-part" data-part="left-upper-arm" data-angle="0" data-base="">
-                  <rect class="rig-arm rig-red" x="-10" y="0" width="20" height="64" rx="10"></rect><circle class="rig-joint" cy="66" r="9"></circle><rect class="rig-pick" data-pick="left-upper-arm" x="-22" y="-4" width="44" height="72"></rect>
-                  <g class="rig-part" data-part="left-forearm" data-angle="0" data-base="translate(0 66)">
-                    <rect class="rig-arm rig-orange" x="-9" y="0" width="18" height="58" rx="9"></rect><circle class="rig-hand" cy="65" r="10"></circle><rect class="rig-pick" data-pick="left-forearm" x="-20" y="-4" width="40" height="72"></rect>
+            <desc id="editor-desc">A hip-rooted side-view skeleton with selectable head, torso, upper limbs, forearms, thighs, and shins. Feet are positioned by two-bone IK.</desc>
+            <g id="animator-ground-layer" aria-hidden="true">
+              <ellipse id="animator-shadow" cx="180" cy="431" rx="38" ry="5"></ellipse>
+              <g id="animator-ground-ticks"></g>
+              <line class="animator-ground-line" x1="14" y1="430" x2="346" y2="430"></line>
+            </g>
+            <g id="editor-camera">
+              <g id="editor-character" transform="translate(180 268.5)">
+                <!-- Far leg: drawn behind the torso. -->
+                <g class="rig-chain rig-far" data-chain="left-leg" transform="translate(-8 0)">
+                  <circle class="rig-joint rig-hip" r="7"></circle>
+                  <g class="rig-part" data-part="left-thigh" data-angle="0" data-base="">
+                    <rect class="rig-leg rig-blue" x="-10" y="0" width="20" height="80" rx="10"></rect><circle class="rig-joint" cy="80" r="9"></circle><rect class="rig-pick" data-pick="left-thigh" x="-24" y="-4" width="48" height="88"></rect>
+                    <g class="rig-part" data-part="left-shin" data-angle="0" data-base="translate(0 80)">
+                      <rect class="rig-leg rig-green" x="-9" y="0" width="18" height="74" rx="9"></rect><rect class="rig-pick" data-pick="left-shin" x="-23" y="-4" width="46" height="82"></rect>
+                      <g class="rig-auto rig-ankle" data-ankle="left" data-base="translate(0 74)" transform="translate(0 74)">
+                        <circle class="rig-joint" r="6"></circle><rect class="rig-foot" x="-10" y="0" width="42" height="12" rx="6"></rect>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+                <!-- Upper body rotates around the hip joint, not around the canvas centre. -->
+                <g id="editor-upper-body">
+                  <!-- Far arm: behind torso. -->
+                  <g class="rig-chain rig-far" data-chain="left-arm" transform="translate(-5 -123)">
+                    <circle class="rig-joint rig-shoulder" r="7"></circle>
+                    <g class="rig-part" data-part="left-upper-arm" data-angle="0" data-base="">
+                      <rect class="rig-arm rig-red" x="-10" y="0" width="20" height="64" rx="10"></rect><circle class="rig-joint" cy="64" r="9"></circle><rect class="rig-pick" data-pick="left-upper-arm" x="-22" y="-4" width="44" height="72"></rect>
+                      <g class="rig-part" data-part="left-forearm" data-angle="0" data-base="translate(0 64)">
+                        <rect class="rig-arm rig-orange" x="-9" y="0" width="18" height="58" rx="9"></rect><circle class="rig-hand" cy="58" r="10"></circle><rect class="rig-pick" data-pick="left-forearm" x="-20" y="-4" width="40" height="70"></rect>
+                      </g>
+                    </g>
+                  </g>
+                  <g class="rig-part" data-part="torso" data-angle="0" data-base="">
+                    <rect class="rig-torso" x="-18" y="-136" width="36" height="136" rx="16"></rect><rect class="rig-pick" data-pick="torso" x="-26" y="-140" width="52" height="144"></rect>
+                  </g>
+                  <g class="rig-part" data-part="head" data-angle="0" data-base="translate(0 -136)">
+                    <g class="rig-head-art" transform="translate(0 -34)">
+                      <circle class="rig-head" r="34"></circle>
+                      <circle class="rig-eye" cx="10" cy="-10" r="4"></circle><circle class="rig-eye" cx="22" cy="-10" r="4"></circle>
+                      <path class="rig-nose" d="M25-3l12 6-12 5z"></path><path class="rig-mouth" d="M10 16q9 7 18 0"></path>
+                    </g>
+                    <circle class="rig-pick" data-pick="head" cx="0" cy="-34" r="40"></circle>
+                  </g>
+                  <!-- Near arm: in front of torso and head. -->
+                  <g class="rig-chain rig-near" data-chain="right-arm" transform="translate(5 -123)">
+                    <circle class="rig-joint rig-shoulder" r="7"></circle>
+                    <g class="rig-part" data-part="right-upper-arm" data-angle="0" data-base="">
+                      <rect class="rig-arm rig-purple" x="-10" y="0" width="20" height="64" rx="10"></rect><circle class="rig-joint" cy="64" r="9"></circle><rect class="rig-pick" data-pick="right-upper-arm" x="-22" y="-4" width="44" height="72"></rect>
+                      <g class="rig-part" data-part="right-forearm" data-angle="0" data-base="translate(0 64)">
+                        <rect class="rig-arm rig-green" x="-9" y="0" width="18" height="58" rx="9"></rect><circle class="rig-hand" cy="58" r="10"></circle><rect class="rig-pick" data-pick="right-forearm" x="-20" y="-4" width="40" height="70"></rect>
+                      </g>
+                    </g>
+                  </g>
+                  <circle class="rig-joint rig-neck-joint" cx="0" cy="-136" r="7"></circle>
+                  <circle class="rig-joint rig-shoulder" cx="-5" cy="-123" r="7"></circle><circle class="rig-joint rig-shoulder" cx="5" cy="-123" r="7"></circle>
+                </g>
+                <!-- Near leg: drawn in front of the torso. -->
+                <g class="rig-chain rig-near" data-chain="right-leg" transform="translate(8 0)">
+                  <circle class="rig-joint rig-hip" r="7"></circle>
+                  <g class="rig-part" data-part="right-thigh" data-angle="0" data-base="">
+                    <rect class="rig-leg rig-purple" x="-10" y="0" width="20" height="80" rx="10"></rect><circle class="rig-joint" cy="80" r="9"></circle><rect class="rig-pick" data-pick="right-thigh" x="-24" y="-4" width="48" height="88"></rect>
+                    <g class="rig-part" data-part="right-shin" data-angle="0" data-base="translate(0 80)">
+                      <rect class="rig-leg rig-orange" x="-9" y="0" width="18" height="74" rx="9"></rect><rect class="rig-pick" data-pick="right-shin" x="-23" y="-4" width="46" height="82"></rect>
+                      <g class="rig-auto rig-ankle" data-ankle="right" data-base="translate(0 74)" transform="translate(0 74)">
+                        <circle class="rig-joint" r="6"></circle><rect class="rig-foot" x="-10" y="0" width="42" height="12" rx="6"></rect>
+                      </g>
+                    </g>
                   </g>
                 </g>
               </g>
-              <g class="rig-chain" data-chain="right-arm" transform="translate(22 -55)">
-                <g class="rig-part" data-part="right-upper-arm" data-angle="0" data-base="">
-                  <rect class="rig-arm rig-purple" x="-10" y="0" width="20" height="64" rx="10"></rect><circle class="rig-joint" cy="66" r="9"></circle><rect class="rig-pick" data-pick="right-upper-arm" x="-22" y="-4" width="44" height="72"></rect>
-                  <g class="rig-part" data-part="right-forearm" data-angle="0" data-base="translate(0 66)">
-                    <rect class="rig-arm rig-green" x="-9" y="0" width="18" height="58" rx="9"></rect><circle class="rig-hand" cy="65" r="10"></circle><rect class="rig-pick" data-pick="right-forearm" x="-20" y="-4" width="40" height="72"></rect>
-                  </g>
-                </g>
-              </g>
-              <g class="rig-chain" data-chain="left-leg" transform="translate(-15 68)">
-                <g class="rig-part" data-part="left-thigh" data-angle="0" data-base="">
-                  <rect class="rig-leg rig-blue" x="-12" y="0" width="24" height="76" rx="12"></rect><circle class="rig-joint" cy="78" r="10"></circle><rect class="rig-pick" data-pick="left-thigh" x="-24" y="-4" width="48" height="86"></rect>
-                  <g class="rig-part" data-part="left-shin" data-angle="0" data-base="translate(0 78)">
-                    <rect class="rig-leg rig-green" x="-11" y="0" width="22" height="72" rx="11"></rect><rect class="rig-foot" x="-25" y="66" width="48" height="16" rx="8"></rect><rect class="rig-pick" data-pick="left-shin" x="-22" y="-4" width="44" height="84"></rect>
-                  </g>
-                </g>
-              </g>
-              <g class="rig-chain" data-chain="right-leg" transform="translate(15 68)">
-                <g class="rig-part" data-part="right-thigh" data-angle="0" data-base="">
-                  <rect class="rig-leg rig-purple" x="-12" y="0" width="24" height="76" rx="12"></rect><circle class="rig-joint" cy="78" r="10"></circle><rect class="rig-pick" data-pick="right-thigh" x="-24" y="-4" width="48" height="86"></rect>
-                  <g class="rig-part" data-part="right-shin" data-angle="0" data-base="translate(0 78)">
-                    <rect class="rig-leg rig-orange" x="-11" y="0" width="22" height="72" rx="11"></rect><rect class="rig-foot" x="-18" y="66" width="48" height="16" rx="8"></rect><rect class="rig-pick" data-pick="right-shin" x="-22" y="-4" width="44" height="84"></rect>
-                  </g>
-                </g>
-              </g>
-              <circle class="rig-joint rig-neck-joint" cx="0" cy="-68" r="8"></circle>
-              <circle class="rig-joint rig-shoulder" cx="-22" cy="-55" r="8"></circle><circle class="rig-joint rig-shoulder" cx="22" cy="-55" r="8"></circle>
-              <circle class="rig-joint rig-hip" cx="-15" cy="68" r="8"></circle><circle class="rig-joint rig-hip" cx="15" cy="68" r="8"></circle>
             </g>
           </svg>
           <p class="stage-instruction">Select a segment · drag or use the angle control</p>
@@ -92,7 +120,7 @@
             <button class="preset-button" type="button" data-preset="stand"><b>01</b><span>Stand</span><i>Loop</i></button>
             <button class="preset-button" type="button" data-preset="walk"><b>02</b><span>Walk</span><i>Loop</i></button>
             <button class="preset-button" type="button" data-preset="run"><b>03</b><span>Run</span><i>Loop</i></button>
-            <button class="preset-button" type="button" data-preset="jump"><b>04</b><span>Jump</span><i>Loop</i></button>
+            <button class="preset-button" type="button" data-preset="jump"><b>04</b><span>Jump</span><i>Once</i></button>
             <button class="preset-button" type="button" data-preset="swim"><b>05</b><span>Swim</span><i>Loop</i></button>
             <button class="preset-button" type="button" data-preset="squat"><b>06</b><span>Squat</span><i>Loop</i></button>
           </div>
@@ -106,7 +134,7 @@
         </section>
         <section class="inspector-card">
           <button id="animator-export" class="editor-button editor-button-primary editor-button-wide" type="button">Export pose JSON</button>
-          <p id="export-status" class="export-status" aria-live="polite">Connected skeleton data · v4</p>
+          <p id="export-status" class="export-status" aria-live="polite">Connected skeleton data · v5</p>
         </section>
       </aside>
     </section>

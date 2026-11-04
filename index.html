@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Stickman Motion Simulator | Home</title>
   <meta name="description" content="A bright, playful home for exploring stickman movement.">
-  <meta name="theme-color" content="#ff8a26">
+  <meta name="theme-color" content="#f7f3e8">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Stickman Motion Simulator">
   <meta property="og:description" content="Explore movement through bright color-block portraits and playful motion studies.">
@@ -15,43 +15,102 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="home-page">
-  <main class="home-canvas">
-    <p class="home-kicker">Stickman Motion · a tiny movement museum</p>
-    <p class="home-counter">01 / 04</p>
+  <a class="skip-link" href="#home-main">Skip to content</a>
+  <header class="site-header home-header">
+    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
+    <nav aria-label="Primary navigation">
+      <a aria-current="page" href="index.html">Home</a><a href="simulator.html">Simulator</a><a href="gallery.html">Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a>
+    </nav>
+  </header>
 
-    <section class="portrait-wrap" aria-labelledby="home-title">
-      <p class="portrait-label">Hello, mover!</p>
-      <svg id="home-portrait" class="portrait" viewBox="0 0 520 580" role="button" tabindex="0" aria-label="Change the portrait's mood" aria-labelledby="portrait-title portrait-desc">
-        <title id="portrait-title">A bright color-block portrait</title>
-        <desc id="portrait-desc">A playful head made from cobalt blue, tomato red, orange, green, and purple shapes.</desc>
-        <path fill="#2148d8" d="M92 235C85 105 170 34 286 42c115 8 162 95 137 196-36-38-70-51-118-47-77 6-133 41-213 44z"/>
-        <path fill="#f04438" d="M92 188c49-20 92-58 102-117 51 24 113 31 173 17 2 50 24 94 74 119-5 80-60 145-150 145-111 0-177-61-199-164z"/>
-        <circle fill="#ffb58a" cx="265" cy="271" r="143"/>
-        <path fill="#ff8a26" d="M130 273c18-43 44-68 78-83 42 46 92 61 162 42 20 29 29 63 26 101-26-49-69-81-126-88-46 33-84 50-140 55z"/>
-        <circle class="portrait-eye" fill="#10152f" cx="212" cy="273" r="14"/><circle class="portrait-eye" fill="#10152f" cx="323" cy="273" r="14"/>
-        <path class="portrait-mouth" fill="#2148d8" d="M223 330c30 29 62 29 92-1-8 54-76 66-92 1z"/>
-        <path fill="#58c637" d="M72 405h158v125H72z"/><path fill="#8b42d8" d="M302 405h156v125H302z"/>
-        <path fill="#ff8a26" d="M190 384h150v55H190z"/><circle fill="#ff8a26" cx="80" cy="390" r="30"/>
-        <circle fill="#2148d8" cx="447" cy="383" r="31"/><path fill="#f04438" d="M228 485h80v45h-80z"/>
-      </svg>
-      <h1 id="home-title">Find your<br><span>funny walk.</span></h1>
+  <main id="home-main" class="home-canvas">
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="home-copy">
+        <p class="home-kicker">Stickman Motion · A tiny movement museum</p>
+        <h1 id="home-title">Find your<br><span>funny walk.</span></h1>
+        <p class="home-lede">A bright study of balance, rhythm, and the small choices that turn a pose into a personality. Step into the lab, browse the poses, or take the rig for a spin.</p>
+        <div class="home-actions">
+          <a class="button button-primary" href="simulator.html">Try the simulator <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="animator.html">Meet the rig <span aria-hidden="true">↗</span></a>
+        </div>
+        <dl class="home-stats" aria-label="Project facts">
+          <div><dt>07</dt><dd>motions</dd></div>
+          <div><dt>01</dt><dd>body</dd></div>
+          <div><dt>∞</dt><dd>rhythms</dd></div>
+        </dl>
+      </div>
+
+      <div class="home-stage">
+        <div class="home-stage-top">
+          <span class="stage-index">Portrait / 01</span>
+          <span class="home-counter">07 motions · 01 body</span>
+        </div>
+        <div class="portrait-wrap">
+          <p class="portrait-label">Hello, mover!</p>
+          <svg id="home-portrait" class="portrait" viewBox="0 0 520 580" role="button" tabindex="0" aria-label="Change the portrait's mood" aria-describedby="portrait-desc">
+            <title id="portrait-title">A bright color-block portrait</title>
+            <desc id="portrait-desc">A playful head made from cobalt blue, tomato red, orange, green, and purple shapes.</desc>
+            <path fill="#2148d8" d="M92 235C85 105 170 34 286 42c115 8 162 95 137 196-36-38-70-51-118-47-77 6-133 41-213 44z"/>
+            <path fill="#f04438" d="M92 188c49-20 92-58 102-117 51 24 113 31 173 17 2 50 24 94 74 119-5 80-60 145-150 145-111 0-177-61-199-164z"/>
+            <circle fill="#ffb58a" cx="265" cy="271" r="143"/>
+            <path fill="#ff8a26" d="M130 273c18-43 44-68 78-83 42 46 92 61 162 42 20 29 29 63 26 101-26-49-69-81-126-88-46 33-84 50-140 55z"/>
+            <circle class="portrait-eye" fill="#10152f" cx="212" cy="273" r="14"/><circle class="portrait-eye" fill="#10152f" cx="323" cy="273" r="14"/>
+            <path class="portrait-mouth" fill="#2148d8" d="M223 330c30 29 62 29 92-1-8 54-76 66-92 1z"/>
+            <path fill="#58c637" d="M72 405h158v125H72z"/><path fill="#8b42d8" d="M302 405h156v125H302z"/>
+            <path fill="#ff8a26" d="M190 384h150v55H190z"/><circle fill="#ff8a26" cx="80" cy="390" r="30"/>
+            <circle fill="#2148d8" cx="447" cy="383" r="31"/><path fill="#f04438" d="M228 485h80v45h-80z"/>
+          </svg>
+        </div>
+        <div class="home-stage-bottom">
+          <aside id="home-dialogue" class="home-dialogue" aria-live="polite">
+            <span>VOICE NOTE</span>
+            <strong>“Every body has a rhythm.”</strong>
+            <button id="portrait-mood" type="button" aria-label="Change portrait mood">Change mood ↻</button>
+          </aside>
+          <div class="home-note-triggers" aria-label="Field notes">
+            <button class="bubble-note home-note" type="button" aria-controls="home-dialogue" data-message="Six simple poses. Infinite little stories.">What is this? <span aria-hidden="true">+</span></button>
+            <button class="bubble-note bubble-note-two home-note" type="button" aria-controls="home-dialogue" data-message="Click a pose, watch it change, and make the web feel alive.">How to play? <span aria-hidden="true">+</span></button>
+          </div>
+          <p class="stage-help">Click the portrait to change its mood.</p>
+        </div>
+      </div>
     </section>
 
-    <nav class="bubble-nav" aria-label="Explore the project">
-      <a class="bubble bubble-blue bubble-simulator" href="simulator.html">Try it<br><strong>Simulator</strong><i aria-hidden="true">↗</i></a>
-      <a class="bubble bubble-purple bubble-gallery" href="gallery.html">See the<br><strong>Gallery</strong><i aria-hidden="true">↗</i></a>
-      <a class="bubble bubble-green bubble-about" href="about.html">Meet the<br><strong>Project</strong><i aria-hidden="true">↗</i></a>
-      <button class="bubble bubble-red bubble-note" type="button" data-message="Six simple poses. Infinite little stories.">What is<br><strong>this?</strong><i aria-hidden="true">+</i></button>
-      <button class="bubble bubble-orange bubble-note bubble-note-two" type="button" data-message="Click a pose, watch it change, and make the web feel alive.">How to<br><strong>play</strong><i aria-hidden="true">+</i></button>
-    </nav>
+    <section class="home-explore" aria-labelledby="explore-title">
+      <div class="home-section-head">
+        <div><p class="eyebrow">Choose a room</p><h2 id="explore-title">Four ways into the motion.</h2></div>
+        <p>Play with a pose, study the vocabulary, build a rig, or read the notes behind the project.</p>
+      </div>
+      <nav class="bubble-nav home-route-grid" aria-label="Explore the project">
+        <a class="bubble bubble-blue bubble-simulator route-card route-simulator" href="simulator.html"><span class="route-index">01 / Play</span><strong>Simulator</strong><span class="route-copy">Switch poses and watch the body find a new rhythm.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-yellow bubble-gallery route-card route-gallery" href="gallery.html"><span class="route-index">02 / Browse</span><strong>Gallery</strong><span class="route-copy">Seven poses, one bright visual vocabulary.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-purple bubble-animator route-card route-animator" href="animator.html"><span class="route-index">03 / Pose</span><strong>Animator</strong><span class="route-copy">Grab a joint and build a side-view movement study.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-green bubble-about route-card route-about" href="about.html"><span class="route-index">04 / Read</span><strong>The project</strong><span class="route-copy">The ideas, constraints, and small experiments behind the motion.</span><i aria-hidden="true">↗</i></a>
+      </nav>
+    </section>
 
-    <aside id="home-dialogue" class="home-dialogue" aria-live="polite">
-      <span>VOICE NOTE</span>
-      <strong>“Every body has a rhythm.”</strong>
-      <button id="portrait-mood" type="button" aria-label="Change portrait mood">Change mood ↻</button>
-    </aside>
-    <p class="home-footer">A student-made visual experiment<br>in HTML · CSS · SVG · JavaScript</p>
+    <section class="home-index" aria-labelledby="index-title">
+      <div class="home-index-copy">
+        <p class="eyebrow">Movement vocabulary</p>
+        <h2 id="index-title">Seven ways to move.</h2>
+        <p>Every pose is a small decision about balance. Jump straight to one in the gallery.</p>
+      </div>
+      <ol class="motion-index">
+        <li><a href="gallery.html#motion-stand"><span>01</span><strong>Stand</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-walk"><span>02</span><strong>Walk</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-run"><span>03</span><strong>Run</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-jump"><span>04</span><strong>Jump</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-wave"><span>05</span><strong>Wave</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-squat"><span>06</span><strong>Squat</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-swim"><span>07</span><strong>Swim</strong><i aria-hidden="true">↗</i></a></li>
+      </ol>
+    </section>
   </main>
+
+  <footer class="site-footer home-footer page-shell">
+    <p>A student-made visual experiment in HTML · CSS · SVG · JavaScript.</p>
+    <p>© 2026 Stickman Motion Simulator</p>
+  </footer>
   <script src="script.js"></script>
 </body>
 </html>

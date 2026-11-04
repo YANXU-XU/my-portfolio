@@ -1,40 +1,56 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Simulator | Stickman Motion Simulator</title>
-  <meta name="description" content="Click the stage to switch between seven stickman motions.">
-  <meta name="theme-color" content="#f5f8ff">
+  <title>Echo the Moves | Stickman Motion Simulator</title>
+  <meta name="description" content="Play Motion Echo: watch a short stickman motion sequence, then repeat it with seven numbered move keys.">
+  <meta name="theme-color" content="#f7f3e8">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Stickman Motion Simulator">
-  <meta property="og:description" content="Click anywhere on the stage to switch a stickman motion.">
+  <meta property="og:title" content="Motion Echo | Stickman Motion Simulator">
+  <meta property="og:description" content="Watch a short stickman motion phrase, then repeat it with seven numbered move keys.">
   <meta property="og:url" content="https://example.com/stickman-motion-simulator/simulator.html">
   <meta property="og:image" content="https://example.com/stickman-motion-simulator/og-image.svg">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235b6ee1'/%3E%3Ccircle cx='32' cy='18' r='7' fill='white'/%3E%3Cpath d='M32 27v18M20 35l12 5 12-5M24 56l8-11 8 11' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="simulator-body">
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
-    <nav aria-label="Primary navigation">
-      <a href="index.html">Home</a><a class="is-active" href="simulator.html">Simulator</a><a href="gallery.html">Motion Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a>
-    </nav>
+    <nav aria-label="Primary navigation"><a href="index.html">Home</a><a class="is-active" aria-current="page" href="simulator.html">Simulator</a><a href="gallery.html">Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a></nav>
   </header>
-  <main class="page-shell simulator-page">
-    <section class="section-heading" aria-labelledby="sim-title">
-      <p class="eyebrow">Interactive motion lab</p>
-      <h1 id="sim-title">Find a new rhythm.</h1>
-      <p>Click anywhere on the stage to switch the pose. Every change is a small study in timing and balance.</p>
+  <main id="main-content" class="page-shell simulator-page echo-page">
+    <section class="section-heading echo-heading" aria-labelledby="sim-title">
+      <p class="eyebrow">Motion playground · Echo</p>
+      <h1 id="sim-title">Can you echo the moves?</h1>
+      <p class="echo-lede">Watch a short motion phrase, then repeat it with the seven numbered move keys. Every round adds one more move.</p>
     </section>
-    <section class="simulator-layout" aria-label="Stickman motion simulator">
-      <article class="stage-card">
-        <button id="motion-stage" class="motion-stage" type="button" aria-label="Change stickman motion">
-          <span class="stage-grid" aria-hidden="true"></span>
-          <span id="motion-badge" class="motion-badge">01 / 07</span>
-          <svg id="stickman" class="stickman-svg simulator-stickman" viewBox="0 0 300 340" role="img" aria-labelledby="motion-name motion-instruction">
+
+    <section id="echo-game" class="echo-game" data-state="idle" aria-label="Motion Echo game">
+      <article class="echo-stage-card">
+        <div class="echo-hud" aria-label="Game status">
+          <div class="echo-stat">
+            <span class="echo-stat-label">Round</span>
+            <strong><span id="echo-round">01</span><span class="echo-stat-total"> / 05</span></strong>
+          </div>
+          <div class="echo-stat">
+            <span class="echo-stat-label">Score</span>
+            <strong id="echo-score">000</strong>
+          </div>
+          <div class="echo-stat echo-stat-lives">
+            <span class="echo-stat-label">Lives</span>
+            <strong id="echo-lives" aria-label="3 lives left">●●●</strong>
+          </div>
+          <button id="echo-reset" class="echo-reset" type="button">Restart</button>
+        </div>
+
+        <div id="echo-stage" class="echo-stage" data-motion="stand">
+          <span class="echo-stage-label" aria-hidden="true">Memory stage</span>
+          <span id="echo-state" class="echo-state" data-state="idle">Ready</span>
+          <svg id="echo-stickman" class="echo-stickman stickman-svg" viewBox="0 0 300 340" role="img" aria-label="Stickman standing">
             <circle class="svg-skin" cx="150" cy="70" r="31"/>
-            <g id="motion-pose" class="motion-pose">
+            <g id="echo-pose" class="echo-pose">
               <rect fill="#2148d8" x="136" y="106" width="28" height="111"/>
               <path fill="#f04438" d="M136 125 82 159l10 17 44-23zM164 125l54 34-10 17-44-23z"/>
               <path fill="#58c637" d="m136 210-38 78 18 9 48-70zM164 210l38 78-18 9-48-70z"/>
@@ -42,28 +58,52 @@
               <rect fill="#ff8a26" x="198" y="288" width="34" height="12"/>
             </g>
           </svg>
-          <span id="motion-instruction" class="stage-hint">Click the stage to move</span>
-        </button>
-        <div class="motion-status" aria-live="polite">
-          <span class="status-dot"></span>
-          <span>Current motion: <strong id="motion-name">Stand</strong></span>
+          <span id="echo-motion-label" class="echo-motion-label">Stand</span>
+          <span class="echo-stage-floor" aria-hidden="true"></span>
         </div>
-        <p class="dialogue" aria-live="polite"><span>VOICE NOTE</span><strong id="motion-dialogue">“Just hanging around, admiring the art.”</strong></p><div class="stage-progress" aria-hidden="true"><span id="motion-progress"></span></div>
+
+        <p class="echo-stage-caption"><span class="echo-caption-mark" aria-hidden="true">✦</span><span id="echo-stage-caption">Watch the stage, then repeat the phrase.</span></p>
       </article>
-      <aside class="control-card">
-        <p class="eyebrow">Motion sequence</p>
-        <h2>Seven ways to move</h2>
-        <ol id="motion-list" class="motion-list">
-          <li class="is-selected" tabindex="0" role="button" aria-current="true"><span>01</span> Stand</li><li tabindex="0" role="button"><span>02</span> Walk</li><li tabindex="0" role="button"><span>03</span> Run</li><li tabindex="0" role="button"><span>04</span> Jump</li><li tabindex="0" role="button"><span>05</span> Wave</li><li tabindex="0" role="button"><span>06</span> Squat</li><li tabindex="0" role="button"><span>07</span> Swim</li>
-        </ol>
-        <div class="motion-controls" aria-label="Playback controls"><button id="tour-toggle" class="control-button" type="button" aria-pressed="false">Pause tour</button><button id="next-motion" class="control-button control-button-primary" type="button">Next pose →</button></div>
-        <label class="tempo-control" for="tempo-select">Tour tempo<select id="tempo-select"><option value="6">Slow · 6 sec</option><option value="4" selected>Balanced · 4 sec</option><option value="2">Quick · 2 sec</option></select></label>
-        <p class="tip"><span aria-hidden="true">↗</span> Tip: clicking quickly can create your own animation sequence.</p>
-        <p class="auto-status"><span class="auto-dot"></span> <span id="tour-status">Auto tour is on</span> · next pose in <strong id="countdown">4</strong>s</p>
+
+      <aside class="echo-sidebar" aria-labelledby="echo-prompt">
+        <p class="eyebrow">Your mission</p>
+        <h2 id="echo-prompt">Watch. Remember. Repeat.</h2>
+
+        <div id="echo-howto" class="echo-howto">
+          <p class="echo-kicker">How to play</p>
+          <ol class="echo-steps">
+            <li><span>01</span><p><strong>Watch</strong> a short motion phrase.</p></li>
+            <li><span>02</span><p><strong>Repeat</strong> it with the seven numbered keys.</p></li>
+            <li><span>03</span><p><strong>Keep going</strong> for five rounds. Three misses end the run.</p></li>
+          </ol>
+        </div>
+
+        <p id="echo-message" class="echo-message" role="status" aria-live="polite" aria-atomic="true">Press Start game when you are ready.</p>
+
+        <div id="echo-progress" class="echo-progress" role="img" aria-label="No moves entered"></div>
+
+        <div class="echo-actions">
+          <button id="echo-primary" class="echo-primary" type="button" data-action="start">Start game</button>
+          <button id="echo-replay" class="echo-secondary" type="button" hidden>Watch again</button>
+        </div>
+
+        <div class="echo-keypad-head" aria-hidden="true"><span>Repeat with</span><span>Keys 1–7</span></div>
+        <div id="echo-keypad" class="echo-keypad" role="group" aria-labelledby="echo-keypad-label">
+          <span id="echo-keypad-label" class="sr-only">Seven motion keys</span>
+          <button class="echo-key" type="button" data-motion="stand" aria-label="Move 1: Stand" aria-keyshortcuts="1" disabled><span class="echo-key-number">01</span><span class="echo-key-name">Stand</span></button>
+          <button class="echo-key" type="button" data-motion="walk" aria-label="Move 2: Walk" aria-keyshortcuts="2" disabled><span class="echo-key-number">02</span><span class="echo-key-name">Walk</span></button>
+          <button class="echo-key" type="button" data-motion="run" aria-label="Move 3: Run" aria-keyshortcuts="3" disabled><span class="echo-key-number">03</span><span class="echo-key-name">Run</span></button>
+          <button class="echo-key" type="button" data-motion="jump" aria-label="Move 4: Jump" aria-keyshortcuts="4" disabled><span class="echo-key-number">04</span><span class="echo-key-name">Jump</span></button>
+          <button class="echo-key" type="button" data-motion="wave" aria-label="Move 5: Wave" aria-keyshortcuts="5" disabled><span class="echo-key-number">05</span><span class="echo-key-name">Wave</span></button>
+          <button class="echo-key" type="button" data-motion="squat" aria-label="Move 6: Squat" aria-keyshortcuts="6" disabled><span class="echo-key-number">06</span><span class="echo-key-name">Squat</span></button>
+          <button class="echo-key" type="button" data-motion="swim" aria-label="Move 7: Swim" aria-keyshortcuts="7" disabled><span class="echo-key-number">07</span><span class="echo-key-name">Swim</span></button>
+        </div>
+        <p class="echo-shortcut"><span aria-hidden="true">⌨</span> Press <kbd>1</kbd> to <kbd>7</kbd> after the phrase ends. Touch and click work too.</p>
       </aside>
     </section>
   </main>
   <footer class="site-footer page-shell"><p>Move lightly. Observe closely.</p><p>© 2026 Stickman Motion Simulator</p></footer>
   <script src="script.js"></script>
+  <script src="simulator.js"></script>
 </body>
 </html>
