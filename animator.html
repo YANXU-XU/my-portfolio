@@ -1,38 +1,45 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Animator | Stickman Motion Simulator</title>
-  <meta name="description" content="Pose and animate a connected SVG stickman skeleton.">
+  <title data-i18n="meta.animator.title">Animator | Stickman Motion Simulator</title>
+  <meta name="description" content="Pose and animate a connected SVG stickman skeleton." data-i18n-content="meta.animator.description">
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
-    <nav aria-label="Primary navigation">
-      <a href="index.html">Home</a><a href="simulator.html">Simulator</a><a href="gallery.html">Motion Gallery</a><a class="is-active" href="animator.html">Animator</a><a href="about.html">About</a>
+    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home" data-i18n-aria-label="common.brandHome"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
+    <nav aria-label="Primary navigation" data-i18n-aria-label="common.primaryNav">
+      <a href="index.html" data-i18n="common.nav.home">Home</a><a href="simulator.html" data-i18n="common.nav.simulator">Simulator</a><a href="gallery.html" data-i18n="common.nav.gallery">Motion Gallery</a><a class="is-active" href="animator.html" data-i18n="common.nav.animator">Animator</a><a href="about.html" data-i18n="common.nav.about">About</a>
     </nav>
+    <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="common.language">
+      <button type="button" data-language="zh-CN" lang="zh-CN" aria-label="简体中文" data-i18n-aria-label="common.switchToChinese" aria-pressed="true">中文</button>
+      <span class="language-separator" aria-hidden="true">|</span>
+      <button type="button" data-language="en" lang="en" aria-label="English" data-i18n-aria-label="common.switchToEnglish" aria-pressed="false">EN</button>
+    </div>
+
   </header>
   <main class="page-shell animator-page">
     <section class="section-heading animator-heading" aria-labelledby="animator-title">
-      <p class="eyebrow">Connected skeleton studio</p>
-      <h1 id="animator-title">Pose a real skeleton.</h1>
-      <p>Every limb is anchored to a joint. Select a segment, change its angle, or play a movement preset.</p>
+      <p class="eyebrow" data-i18n="animator.eyebrow">Connected skeleton studio</p>
+      <h1 id="animator-title" data-i18n="animator.title">Pose a real skeleton.</h1>
+      <p data-i18n="animator.lede">Every limb is anchored to a joint. Select a segment, change its angle, or play a movement preset.</p>
     </section>
-    <section class="animator-workspace" aria-label="Stickman animator">
+    <section class="animator-workspace" aria-label="Stickman animator" data-i18n-aria-label="animator.workspaceAria">
       <article class="animator-canvas-card">
         <div class="animator-topbar">
           <div><span class="studio-dot"></span><span id="animator-status" aria-live="polite">Ready · select a segment</span></div>
           <label class="inline-angle" for="inline-angle"><span id="inline-selected">Torso</span><input id="inline-angle" type="range" min="-180" max="180" value="0"><output id="inline-angle-value">0°</output></label>
-          <button id="animator-reset" class="editor-button" type="button">Reset pose</button>
+          <button id="animator-reset" class="editor-button" type="button" data-i18n="animator.reset">Reset pose</button>
         </div>
         <div id="animator-stage" class="animator-stage animator-stage-v2">
           <div class="stage-grid-lines" aria-hidden="true"></div>
-          <span class="stage-label">SIDE-VIEW RIG</span>
+          <span class="stage-label" data-i18n="animator.rigLabel">SIDE-VIEW RIG</span>
           <svg id="editor-stickman" class="editor-stickman editor-stickman-v2" viewBox="0 0 360 440" preserveAspectRatio="xMidYMax meet" role="img" aria-labelledby="editor-title editor-desc">
-            <title id="editor-title">Connected stickman skeleton</title>
-            <desc id="editor-desc">A hip-rooted side-view skeleton with selectable head, torso, upper limbs, forearms, thighs, and shins. Feet are positioned by two-bone IK.</desc>
+            <title id="editor-title" data-i18n="animator.svg.title">Connected stickman skeleton</title>
+            <desc id="editor-desc" data-i18n="animator.svg.desc">A hip-rooted side-view skeleton with selectable head, torso, upper limbs, forearms, thighs, and shins. Feet are positioned by two-bone IK.</desc>
             <g id="animator-ground-layer" aria-hidden="true">
               <ellipse id="animator-shadow" cx="180" cy="431" rx="38" ry="5"></ellipse>
               <g id="animator-ground-ticks"></g>
@@ -105,41 +112,41 @@
               </g>
             </g>
           </svg>
-          <p class="stage-instruction">Select a segment · drag or use the angle control</p>
+          <p class="stage-instruction" data-i18n="animator.instruction">Select a segment · drag or use the angle control</p>
         </div>
         <div class="animator-transport">
-          <button id="animator-play" class="editor-button editor-button-primary" type="button">▶ Play preset</button>
-          <button id="animator-stop" class="editor-button" type="button">■ Stop</button>
-          <label for="animator-speed">Speed <select id="animator-speed"><option value="0.7">Slow</option><option value="1" selected>Balanced</option><option value="1.35">Fast</option></select></label>
+          <button id="animator-play" class="editor-button editor-button-primary" type="button" data-i18n="animator.play">▶ Play preset</button>
+          <button id="animator-stop" class="editor-button" type="button" data-i18n="animator.stop">■ Stop</button>
+          <label for="animator-speed"><span data-i18n="animator.speed">Speed</span> <select id="animator-speed"><option value="0.7" data-i18n="animator.speed.slow">Slow</option><option value="1" selected data-i18n="animator.speed.balanced">Balanced</option><option value="1.35" data-i18n="animator.speed.fast">Fast</option></select></label>
         </div>
       </article>
       <aside class="animator-inspector">
         <section class="inspector-card">
-          <div class="inspector-heading"><span class="eyebrow">Presets</span><span class="preset-count">06</span></div>
+          <div class="inspector-heading"><span class="eyebrow" data-i18n="animator.presets">Presets</span><span class="preset-count">06</span></div>
           <div class="preset-grid preset-grid-v2">
-            <button class="preset-button" type="button" data-preset="stand"><b>01</b><span>Stand</span><i>Loop</i></button>
-            <button class="preset-button" type="button" data-preset="walk"><b>02</b><span>Walk</span><i>Loop</i></button>
-            <button class="preset-button" type="button" data-preset="run"><b>03</b><span>Run</span><i>Loop</i></button>
-            <button class="preset-button" type="button" data-preset="jump"><b>04</b><span>Jump</span><i>Once</i></button>
-            <button class="preset-button" type="button" data-preset="swim"><b>05</b><span>Swim</span><i>Loop</i></button>
-            <button class="preset-button" type="button" data-preset="squat"><b>06</b><span>Squat</span><i>Loop</i></button>
+            <button class="preset-button" type="button" data-preset="stand"><b>01</b><span data-i18n="motions.stand.label">Stand</span><i data-i18n="animator.preset.loop">Loop</i></button>
+            <button class="preset-button" type="button" data-preset="walk"><b>02</b><span data-i18n="motions.walk.label">Walk</span><i data-i18n="animator.preset.loop">Loop</i></button>
+            <button class="preset-button" type="button" data-preset="run"><b>03</b><span data-i18n="motions.run.label">Run</span><i data-i18n="animator.preset.loop">Loop</i></button>
+            <button class="preset-button" type="button" data-preset="jump"><b>04</b><span data-i18n="motions.jump.label">Jump</span><i data-i18n="animator.preset.once">Once</i></button>
+            <button class="preset-button" type="button" data-preset="swim"><b>05</b><span data-i18n="motions.swim.label">Swim</span><i data-i18n="animator.preset.loop">Loop</i></button>
+            <button class="preset-button" type="button" data-preset="squat"><b>06</b><span data-i18n="motions.squat.label">Squat</span><i data-i18n="animator.preset.loop">Loop</i></button>
           </div>
         </section>
         <section class="inspector-card selected-card">
-          <span class="eyebrow">Selected segment</span>
+          <span class="eyebrow" data-i18n="animator.selected">Selected segment</span>
           <h2 id="selected-part">Torso</h2>
-          <label class="angle-control-v2" for="part-angle">Rotation <output id="angle-value">0°</output><input id="part-angle" type="range" min="-180" max="180" value="0"></label>
-          <div id="part-picker" class="part-picker" aria-label="Select a body segment"></div>
-          <p>Segments stay attached at the elbow, knee, shoulder, and hip. A parent segment carries its connected child.</p>
+          <label class="angle-control-v2" for="part-angle"><span data-i18n="animator.rotation">Rotation</span> <output id="angle-value">0°</output><input id="part-angle" type="range" min="-180" max="180" value="0"></label>
+          <div id="part-picker" class="part-picker" aria-label="Select a body segment" data-i18n-aria-label="animator.partPickerAria"></div>
+          <p data-i18n="animator.partsHint">Segments stay attached at the elbow, knee, shoulder, and hip. A parent segment carries its connected child.</p>
         </section>
         <section class="inspector-card">
-          <button id="animator-export" class="editor-button editor-button-primary editor-button-wide" type="button">Export pose JSON</button>
+          <button id="animator-export" class="editor-button editor-button-primary editor-button-wide" type="button" data-i18n="animator.export">Export pose JSON</button>
           <p id="export-status" class="export-status" aria-live="polite">Connected skeleton data · v5</p>
         </section>
       </aside>
     </section>
   </main>
-  <footer class="site-footer page-shell"><p>Small shapes, serious rhythm.</p><p>© 2026 Stickman Motion Simulator</p></footer>
+  <footer class="site-footer page-shell"><p data-i18n="common.footer.animator">Small shapes, serious rhythm.</p><p data-i18n="common.copyright">© 2026 Stickman Motion Simulator</p></footer>
   <script src="script.js"></script>
   <script src="animator.js"></script>
 </body>

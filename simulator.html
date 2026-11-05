@@ -1,52 +1,59 @@
 ﻿<!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Echo the Moves | Stickman Motion Simulator</title>
-  <meta name="description" content="Play Motion Echo: watch a short stickman motion sequence, then repeat it with seven numbered move keys.">
+  <title data-i18n="meta.simulator.title">Echo the Moves | Stickman Motion Simulator</title>
+  <meta name="description" content="Play Motion Echo: watch a short stickman motion sequence, then repeat it with seven numbered move keys." data-i18n-content="meta.simulator.description">
   <meta name="theme-color" content="#f7f3e8">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Motion Echo | Stickman Motion Simulator">
-  <meta property="og:description" content="Watch a short stickman motion phrase, then repeat it with seven numbered move keys.">
+  <meta property="og:title" content="Motion Echo | Stickman Motion Simulator" data-i18n-content="meta.simulator.ogTitle">
+  <meta property="og:description" content="Watch a short stickman motion phrase, then repeat it with seven numbered move keys." data-i18n-content="meta.simulator.ogDescription">
   <meta property="og:url" content="https://example.com/stickman-motion-simulator/simulator.html">
   <meta property="og:image" content="https://example.com/stickman-motion-simulator/og-image.svg">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235b6ee1'/%3E%3Ccircle cx='32' cy='18' r='7' fill='white'/%3E%3Cpath d='M32 27v18M20 35l12 5 12-5M24 56l8-11 8 11' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
 </head>
 <body class="simulator-body">
-  <a class="skip-link" href="#main-content">Skip to content</a>
+  <a class="skip-link" href="#main-content" data-i18n="common.skip">Skip to content</a>
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
-    <nav aria-label="Primary navigation"><a href="index.html">Home</a><a class="is-active" aria-current="page" href="simulator.html">Simulator</a><a href="gallery.html">Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a></nav>
+    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home" data-i18n-aria-label="common.brandHome"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
+    <nav aria-label="Primary navigation" data-i18n-aria-label="common.primaryNav"><a href="index.html" data-i18n="common.nav.home">Home</a><a class="is-active" aria-current="page" href="simulator.html" data-i18n="common.nav.simulator">Simulator</a><a href="gallery.html" data-i18n="common.nav.gallery">Gallery</a><a href="animator.html" data-i18n="common.nav.animator">Animator</a><a href="about.html" data-i18n="common.nav.about">About</a></nav>
+    <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="common.language">
+      <button type="button" data-language="zh-CN" lang="zh-CN" aria-label="简体中文" data-i18n-aria-label="common.switchToChinese" aria-pressed="true">中文</button>
+      <span class="language-separator" aria-hidden="true">|</span>
+      <button type="button" data-language="en" lang="en" aria-label="English" data-i18n-aria-label="common.switchToEnglish" aria-pressed="false">EN</button>
+    </div>
+
   </header>
   <main id="main-content" class="page-shell simulator-page echo-page">
     <section class="section-heading echo-heading" aria-labelledby="sim-title">
-      <p class="eyebrow">Motion playground · Echo</p>
-      <h1 id="sim-title">Can you echo the moves?</h1>
-      <p class="echo-lede">Watch a short motion phrase, then repeat it with the seven numbered move keys. Every round adds one more move.</p>
+      <p class="eyebrow" data-i18n="simulator.eyebrow">Motion playground · Echo</p>
+      <h1 id="sim-title" data-i18n="simulator.title">Can you echo the moves?</h1>
+      <p class="echo-lede" data-i18n="simulator.lede">Watch a short motion phrase, then repeat it with the seven numbered move keys. Every round adds one more move.</p>
     </section>
 
-    <section id="echo-game" class="echo-game" data-state="idle" aria-label="Motion Echo game">
+    <section id="echo-game" class="echo-game" data-state="idle" aria-label="Motion Echo game" data-i18n-aria-label="simulator.gameAria">
       <article class="echo-stage-card">
-        <div class="echo-hud" aria-label="Game status">
+        <div class="echo-hud" aria-label="Game status" data-i18n-aria-label="simulator.hudAria">
           <div class="echo-stat">
-            <span class="echo-stat-label">Round</span>
+            <span class="echo-stat-label" data-i18n="simulator.round">Round</span>
             <strong><span id="echo-round">01</span><span class="echo-stat-total"> / 05</span></strong>
           </div>
           <div class="echo-stat">
-            <span class="echo-stat-label">Score</span>
+            <span class="echo-stat-label" data-i18n="simulator.score">Score</span>
             <strong id="echo-score">000</strong>
           </div>
           <div class="echo-stat echo-stat-lives">
-            <span class="echo-stat-label">Lives</span>
+            <span class="echo-stat-label" data-i18n="simulator.lives">Lives</span>
             <strong id="echo-lives" aria-label="3 lives left">●●●</strong>
           </div>
-          <button id="echo-reset" class="echo-reset" type="button">Restart</button>
+          <button id="echo-reset" class="echo-reset" type="button" data-i18n="simulator.restart">Restart</button>
         </div>
 
         <div id="echo-stage" class="echo-stage" data-motion="stand">
-          <span class="echo-stage-label" aria-hidden="true">Memory stage</span>
+          <span class="echo-stage-label" aria-hidden="true" data-i18n="simulator.stageLabel">Memory stage</span>
           <span id="echo-state" class="echo-state" data-state="idle">Ready</span>
           <svg id="echo-stickman" class="echo-stickman stickman-svg" viewBox="0 0 300 340" role="img" aria-label="Stickman standing">
             <circle class="svg-skin" cx="150" cy="70" r="31"/>
@@ -66,15 +73,15 @@
       </article>
 
       <aside class="echo-sidebar" aria-labelledby="echo-prompt">
-        <p class="eyebrow">Your mission</p>
-        <h2 id="echo-prompt">Watch. Remember. Repeat.</h2>
+        <p class="eyebrow" data-i18n="simulator.sidebar.eyebrow">Your mission</p>
+        <h2 id="echo-prompt" data-i18n="simulator.sidebar.title">Watch. Remember. Repeat.</h2>
 
         <div id="echo-howto" class="echo-howto">
-          <p class="echo-kicker">How to play</p>
+          <p class="echo-kicker" data-i18n="simulator.howto">How to play</p>
           <ol class="echo-steps">
-            <li><span>01</span><p><strong>Watch</strong> a short motion phrase.</p></li>
-            <li><span>02</span><p><strong>Repeat</strong> it with the seven numbered keys.</p></li>
-            <li><span>03</span><p><strong>Keep going</strong> for five rounds. Three misses end the run.</p></li>
+            <li><span>01</span><p data-i18n-html="simulator.steps.watch"><strong>Watch</strong> a short motion phrase.</p></li>
+            <li><span>02</span><p data-i18n-html="simulator.steps.repeat"><strong>Repeat</strong> it with the seven numbered keys.</p></li>
+            <li><span>03</span><p data-i18n-html="simulator.steps.keep"><strong>Keep going</strong> for five rounds. Three misses end the run.</p></li>
           </ol>
         </div>
 
@@ -84,12 +91,12 @@
 
         <div class="echo-actions">
           <button id="echo-primary" class="echo-primary" type="button" data-action="start">Start game</button>
-          <button id="echo-replay" class="echo-secondary" type="button" hidden>Watch again</button>
+          <button id="echo-replay" class="echo-secondary" type="button" hidden data-i18n="simulator.actions.replay">Watch again</button>
         </div>
 
-        <div class="echo-keypad-head" aria-hidden="true"><span>Repeat with</span><span>Keys 1–7</span></div>
+        <div class="echo-keypad-head" aria-hidden="true"><span data-i18n="simulator.keypad.headRepeat">Repeat with</span><span data-i18n="simulator.keypad.keys">Keys 1–7</span></div>
         <div id="echo-keypad" class="echo-keypad" role="group" aria-labelledby="echo-keypad-label">
-          <span id="echo-keypad-label" class="sr-only">Seven motion keys</span>
+          <span id="echo-keypad-label" class="sr-only" data-i18n="simulator.keypad.label">Seven motion keys</span>
           <button class="echo-key" type="button" data-motion="stand" aria-label="Move 1: Stand" aria-keyshortcuts="1" disabled><span class="echo-key-number">01</span><span class="echo-key-name">Stand</span></button>
           <button class="echo-key" type="button" data-motion="walk" aria-label="Move 2: Walk" aria-keyshortcuts="2" disabled><span class="echo-key-number">02</span><span class="echo-key-name">Walk</span></button>
           <button class="echo-key" type="button" data-motion="run" aria-label="Move 3: Run" aria-keyshortcuts="3" disabled><span class="echo-key-number">03</span><span class="echo-key-name">Run</span></button>
@@ -98,11 +105,11 @@
           <button class="echo-key" type="button" data-motion="squat" aria-label="Move 6: Squat" aria-keyshortcuts="6" disabled><span class="echo-key-number">06</span><span class="echo-key-name">Squat</span></button>
           <button class="echo-key" type="button" data-motion="swim" aria-label="Move 7: Swim" aria-keyshortcuts="7" disabled><span class="echo-key-number">07</span><span class="echo-key-name">Swim</span></button>
         </div>
-        <p class="echo-shortcut"><span aria-hidden="true">⌨</span> Press <kbd>1</kbd> to <kbd>7</kbd> after the phrase ends. Touch and click work too.</p>
+        <p class="echo-shortcut" data-i18n-html="simulator.shortcut.html"><span aria-hidden="true">⌨</span> Press <kbd>1</kbd> to <kbd>7</kbd> after the phrase ends. Touch and click work too.</p>
       </aside>
     </section>
   </main>
-  <footer class="site-footer page-shell"><p>Move lightly. Observe closely.</p><p>© 2026 Stickman Motion Simulator</p></footer>
+  <footer class="site-footer page-shell"><p data-i18n="common.footer.simulator">Move lightly. Observe closely.</p><p data-i18n="common.copyright">© 2026 Stickman Motion Simulator</p></footer>
   <script src="script.js"></script>
   <script src="simulator.js"></script>
 </body>

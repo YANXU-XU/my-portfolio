@@ -1,4 +1,10 @@
 // One shared sequence keeps the stage, dialogue, list, and auto tour in sync.
+const i18n = window.StickmanI18n;
+const tr = (key, params, fallback) => i18n?.t(key, params, fallback) ?? fallback;
+const motionKey = (name) => String(name).toLowerCase();
+const motionLabel = (motion) => tr(`motions.${motionKey(motion.name)}.label`, null, motion.name);
+const motionDialogue = (motion) => tr(`motions.${motionKey(motion.name)}.dialogue`, null, motion.dialogue);
+
 const motions = [
   { name: 'Stand', dialogue: 'Just hanging around, admiring the art.', art: '<rect fill="#2148d8" x="136" y="106" width="28" height="111"/><path fill="#f04438" d="M136 125 82 159l10 17 44-23zM164 125l54 34-10 17-44-23z"/><path fill="#58c637" d="m136 210-38 78 18 9 48-70zM164 210l38 78-18 9-48-70z"/><rect fill="#8b42d8" x="78" y="288" width="34" height="12"/><rect fill="#ff8a26" x="198" y="288" width="34" height="12"/>' },
   { name: 'Walk', dialogue: 'Strolling slowly through the gallery.', art: '<path fill="#2148d8" d="M142 105h28v110h-28z"/><path fill="#ff8a26" d="m142 127-60 26 8 19 52-17z"/><path fill="#f04438" d="m170 127 64 9-3 20-61-4z"/><path fill="#58c637" d="m142 207-65 59 13 14 69-49z"/><path fill="#8b42d8" d="m170 207 54 46-13 15-61-45z"/><rect fill="#ff8a26" x="73" y="271" width="38" height="12"/><rect fill="#2148d8" x="207" y="261" width="38" height="12"/>' },
@@ -40,8 +46,8 @@ if (stage) {
       window.setTimeout(() => pose.classList.remove('is-new'), 400);
       current = nextIndex;
       stage.dataset.motion = motions[current].name.toLowerCase();
-      name.textContent = motions[current].name;
-      dialogue.textContent = motions[current].dialogue;
+      name.textContent = motionLabel(motions[current]);
+      dialogue.textContent = motionDialogue(motions[current]);
       badge.textContent = `${String(current + 1).padStart(2, '0')} / 07`;
       if (progress) progress.style.width = `${((current + 1) / motions.length) * 100}%`;
       list.forEach((item, index) => {
@@ -72,7 +78,14 @@ if (stage) {
     tourToggle.setAttribute('aria-pressed', String(paused));
     tourToggle.textContent = paused ? 'Resume tour' : 'Pause tour';
     tourStatus.textContent = paused ? 'Auto tour is paused' : 'Auto tour is on';
+    // The legacy tour page has no dictionary entry; the fallback keeps it usable.
   }
+
+  document.addEventListener('languagechange', () => {
+    if (name) name.textContent = motionLabel(motions[current]);
+    if (dialogue) dialogue.textContent = motionDialogue(motions[current]);
+    setTourPaused(isTourPaused);
+  });
 
   stage.addEventListener('click', () => {
     let next = Math.floor(Math.random() * motions.length);
@@ -112,36 +125,50 @@ const homeDialogue = document.querySelector('#home-dialogue');
 const homeNotes = [...document.querySelectorAll('.home-page .bubble-note')];
 const homePortrait = document.querySelector('#home-portrait');
 const portraitMoodButton = document.querySelector('#portrait-mood');
+let homeMessageKey = 'home.dialogue.initial';
+let homeMessageFallback = 'Every body has a rhythm.';
+
+function renderHomeMessage() {
+  const homeMessage = homeDialogue?.querySelector('strong');
+  if (!homeMessage) return;
+  homeMessage.textContent = `“${tr(homeMessageKey, null, homeMessageFallback)}”`;
+}
+
 if (homeDialogue && homeNotes.length) {
-  const homeMessage = homeDialogue.querySelector('strong');
   homeNotes.forEach((note) => {
     note.addEventListener('click', () => {
       homeDialogue.classList.add('is-changing');
+      homeMessageKey = note.dataset.messageKey || 'home.dialogue.initial';
+      homeMessageFallback = note.dataset.message;
       window.setTimeout(() => {
-        homeMessage.textContent = `“${note.dataset.message}”`;
+        renderHomeMessage();
         homeDialogue.classList.remove('is-changing');
       }, 220);
     });
   });
+  renderHomeMessage();
+  document.addEventListener('languagechange', renderHomeMessage);
 }
 
 if (homePortrait) {
   const moods = [
-    ['mood-happy', '“A little bounce makes a big entrance.”'],
-    ['mood-surprised', '“Oh! You found the hidden mood button.”'],
-    ['mood-sleepy', '“Even movers need a tiny pause.”']
+    ['mood-happy', 'home.mood.happy', 'A little bounce makes a big entrance.'],
+    ['mood-surprised', 'home.mood.surprised', 'Oh! You found the hidden mood button.'],
+    ['mood-sleepy', 'home.mood.sleepy', 'Even movers need a tiny pause.']
   ];
   let moodIndex = 0;
 
   function changePortraitMood(event) {
-    const [moodClass, message] = moods[moodIndex];
+    const [moodClass, messageKey, messageFallback] = moods[moodIndex];
     moods.forEach(([className]) => homePortrait.classList.remove(className));
     homePortrait.classList.add(moodClass, 'is-reacting');
     window.setTimeout(() => homePortrait.classList.remove('is-reacting'), 500);
+    homeMessageKey = messageKey;
+    homeMessageFallback = messageFallback;
     if (homeDialogue) {
       homeDialogue.classList.add('is-changing');
       window.setTimeout(() => {
-        homeDialogue.querySelector('strong').textContent = message;
+        renderHomeMessage();
         homeDialogue.classList.remove('is-changing');
       }, 180);
     }
@@ -191,13 +218,29 @@ const galleryCards = [...document.querySelectorAll('.motion-card')];
 let soundEnabled = true;
 let audioContext;
 
+function refreshGalleryLabels() {
+  galleryCards.forEach((card) => {
+    const button = card.querySelector('.motion-play');
+    if (!button) return;
+    const isPlaying = card.classList.contains('is-playing');
+    button.textContent = isPlaying
+      ? tr('common.pauseMotion', null, 'Pause motion')
+      : tr('common.playMotion', null, 'Play motion');
+  });
+  if (soundToggle) {
+    soundToggle.textContent = soundEnabled
+      ? tr('common.soundOn', null, 'Sound on')
+      : tr('common.soundOff', null, 'Sound off');
+  }
+}
+
 document.querySelectorAll('.motion-card').forEach((card) => {
   if (!card.querySelector('.motion-play')) {
     const button = document.createElement('button');
     button.className = 'motion-play';
     button.type = 'button';
     button.setAttribute('aria-pressed', 'false');
-    button.textContent = 'Play motion';
+    button.textContent = tr('common.playMotion', null, 'Play motion');
     card.appendChild(button);
   }
 });
@@ -271,7 +314,9 @@ if (soundToggle) {
   soundToggle.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
     soundToggle.setAttribute('aria-pressed', String(soundEnabled));
-    soundToggle.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+    soundToggle.textContent = soundEnabled
+      ? tr('common.soundOn', null, 'Sound on')
+      : tr('common.soundOff', null, 'Sound off');
     if (soundEnabled) playMotionSound('stand');
   });
 }
@@ -282,23 +327,12 @@ galleryCards.forEach((card) => {
   playButton.addEventListener('click', () => {
     const isPlaying = card.classList.toggle('is-playing');
     playButton.setAttribute('aria-pressed', String(isPlaying));
-    playButton.textContent = isPlaying ? 'Pause motion' : 'Play motion';
+    playButton.textContent = isPlaying
+      ? tr('common.pauseMotion', null, 'Pause motion')
+      : tr('common.playMotion', null, 'Play motion');
     if (isPlaying) playMotionSound(card.dataset.motion);
   });
-
-  document.querySelectorAll('.about-interactive .panel-action').forEach((button) => {
-    button.dataset.label = button.textContent;
-    button.addEventListener('click', () => {
-      const panel = button.closest('.about-panel');
-      const active = panel.classList.toggle('is-activated');
-      button.textContent = active ? 'Reset moment' : button.dataset.label || button.textContent;
-      panel.style.setProperty('--tilt', `${(Math.random() * 6 - 3).toFixed(1)}deg`);
-      if (active) {
-        panel.animate(
-          [{ transform: 'scale(1)' }, { transform: 'scale(1.025) rotate(var(--tilt))' }, { transform: 'scale(1)' }],
-          { duration: 500, easing: 'cubic-bezier(.2,1.4,.4,1)' }
-        );
-      }
-    });
-  });
 });
+
+refreshGalleryLabels();
+document.addEventListener('languagechange', refreshGalleryLabels);

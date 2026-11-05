@@ -646,7 +646,10 @@
     drag: null
   };
 
-  const partName = (name) => name.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const tr = (key, params, fallback) => window.StickmanI18n?.t(key, params, fallback) ?? fallback;
+  const rawPartName = (name) => name.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const partName = (name) => tr(`animator.parts.${name}`, null, rawPartName(name));
+  let exportState = 'ready';
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const normalizeDelta = (angle) => ((angle + 540) % 360) - 180;
   const selectedPart = () => partByName.get(state.selected) || partByName.get('torso');
@@ -669,13 +672,40 @@
 
   function refreshStatus() {
     const label = partName(state.selected);
-    const name = state.preset[0].toUpperCase() + state.preset.slice(1);
+    const fallbackName = state.preset[0].toUpperCase() + state.preset.slice(1);
+    const presetLabel = tr(`motions.${state.preset}.label`, null, fallbackName);
     const clip = currentClip();
-    if (state.mode === 'playing') setStatus(`${name} preset · playing · ${clip.loop ? 'loop' : 'once'}`);
-    else if (state.mode === 'finished') setStatus(`${name} preset · finished`);
-    else if (state.mode === 'manual') setStatus(`Manual pose · ${label}`);
-    else if (state.mode === 'paused') setStatus(`${name} preset · paused`);
-    else setStatus(`Ready · ${label} selected`);
+    if (state.mode === 'playing') {
+      const playback = clip.loop
+        ? tr('animator.playback.loop', null, 'loop')
+        : tr('animator.playback.once', null, 'once');
+      setStatus(tr('animator.status.playing', { preset: presetLabel, playback }, `${fallbackName} preset · playing · ${playback}`));
+    } else if (state.mode === 'finished') {
+      setStatus(tr('animator.status.finished', { preset: presetLabel }, `${fallbackName} preset · finished`));
+    } else if (state.mode === 'manual') {
+      setStatus(tr('animator.status.manual', { part: label }, `Manual pose · ${label}`));
+    } else if (state.mode === 'paused') {
+      setStatus(tr('animator.status.paused', { preset: presetLabel }, `${fallbackName} preset · paused`));
+    } else {
+      setStatus(tr('animator.status.readySelected', { part: label }, `Ready · ${label} selected`));
+    }
+  }
+
+  function refreshPartLabels() {
+    parts.forEach((part) => {
+      const name = part.dataset.part;
+      part.setAttribute('aria-label', tr('animator.partAria', { part: partName(name) }, `${rawPartName(name)} segment`));
+    });
+    partPicker?.querySelectorAll('button').forEach((button) => {
+      button.textContent = partName(button.dataset.part);
+    });
+  }
+
+  function refreshExportStatus() {
+    if (!exportStatus) return;
+    exportStatus.textContent = exportState === 'done'
+      ? tr('animator.export.done', null, 'Exported side-view skeleton JSON · v5')
+      : tr('animator.export.ready', null, 'Connected skeleton data · v5');
   }
 
   function setActivePreset(name) {
@@ -952,13 +982,14 @@
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    if (exportStatus) exportStatus.textContent = 'Exported side-view skeleton JSON · v5';
+    exportState = 'done';
+    refreshExportStatus();
   }
 
   parts.forEach((part) => {
     part.setAttribute('tabindex', '0');
     part.setAttribute('role', 'button');
-    part.setAttribute('aria-label', `${partName(part.dataset.part)} segment`);
+    part.setAttribute('aria-label', tr('animator.partAria', { part: partName(part.dataset.part) }, `${rawPartName(part.dataset.part)} segment`));
     part.addEventListener('click', (event) => {
       event.stopPropagation();
       selectPart(part);
@@ -1018,4 +1049,13 @@
   selectPart('torso');
   render();
   refreshStatus();
+  refreshPartLabels();
+  refreshExportStatus();
+
+  document.addEventListener('languagechange', () => {
+    syncControls();
+    refreshStatus();
+    refreshPartLabels();
+    refreshExportStatus();
+  });
 })();

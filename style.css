@@ -975,3 +975,74 @@ nav a:hover::after,nav a.is-active::after,nav a[aria-current="page"]::after { tr
   .echo-stage[data-motion] #echo-pose,.echo-stage #echo-pose.is-pop { animation:none; }
   .echo-stage.is-wrong { animation:none; }
 }
+
+/* Bilingual UI: keep the page hidden only while the first translation paints. */
+html.i18n-booting body {
+  opacity:0;
+  visibility:hidden;
+}
+html.i18n-booting body {
+  animation:i18n-page-reveal .01s steps(1, end) 1.2s forwards;
+}
+@keyframes i18n-page-reveal {
+  to { opacity:1; visibility:visible; }
+}
+
+.site-header { gap:1rem; }
+.site-header > .brand { flex:0 0 auto; }
+.site-header > nav { min-width:0; }
+.language-switch {
+  align-items:center;
+  background:var(--canvas);
+  border:1px solid var(--line-soft);
+  display:inline-flex;
+  flex:0 0 auto;
+  gap:.1rem;
+  justify-content:center;
+  white-space:nowrap;
+}
+.language-switch button {
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  cursor:pointer;
+  font:500 .62rem 'DM Mono',monospace;
+  letter-spacing:.04em;
+  min-height:2rem;
+  padding:.3rem .45rem;
+}
+.language-switch button:hover,
+.language-switch button:focus-visible { color:var(--cobalt); }
+.language-switch button[aria-pressed="true"] { background:var(--ink); color:#fff; }
+.language-switch button:focus-visible { outline:2px solid var(--tomato); outline-offset:1px; }
+.language-separator { color:var(--line-soft); font:500 .62rem 'DM Mono',monospace; }
+
+html[lang="zh-CN"] body { font-family:Manrope,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
+html[lang="zh-CN"] h1,
+html[lang="zh-CN"] h2,
+html[lang="zh-CN"] h3 { letter-spacing:-.03em; line-height:1.18; }
+html[lang="zh-CN"] .home-copy h1,
+html[lang="zh-CN"] .section-heading h1 { line-height:1.08; }
+html[lang="zh-CN"] .home-copy h1 { letter-spacing:-.045em; word-spacing:normal; }
+html[lang="zh-CN"] .eyebrow,
+html[lang="zh-CN"] nav a,
+html[lang="zh-CN"] .language-switch button,
+html[lang="zh-CN"] .echo-keypad-head,
+html[lang="zh-CN"] .home-dialogue span { font-family:'DM Mono',"PingFang SC","Microsoft YaHei",monospace; letter-spacing:.02em; }
+html[lang="zh-CN"] .route-copy,
+html[lang="zh-CN"] .echo-message,
+html[lang="zh-CN"] .echo-steps p { line-height:1.65; }
+
+@media (max-width:700px) {
+  .site-header { gap:.8rem; position:relative; }
+  .site-header > .language-switch {
+    position:absolute;
+    right:var(--gutter);
+    top:.85rem;
+  }
+  .site-header > nav { padding-right:0; }
+}
+@media (max-width:420px) {
+  .language-switch button { font-size:.58rem; min-height:1.9rem; padding:.25rem .35rem; }
+  .site-header > .language-switch { top:.8rem; }
+}

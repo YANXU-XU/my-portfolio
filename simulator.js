@@ -5,7 +5,13 @@
 
   if (typeof motions === 'undefined' || !Array.isArray(motions)) {
     const message = document.querySelector('#echo-message');
-    if (message) message.textContent = 'The motion data did not load. Refresh the page.';
+    if (message) {
+      message.textContent = window.StickmanI18n?.t(
+        'simulator.message.missingData',
+        null,
+        'The motion data did not load. Refresh the page.'
+      ) ?? 'The motion data did not load. Refresh the page.';
+    }
     return;
   }
 
@@ -15,6 +21,8 @@
     motions.map((motion) => [motion.name.toLowerCase(), motion])
   );
   const motionIds = [...motionById.keys()];
+  const tr = (key, params, fallback) => window.StickmanI18n?.t(key, params, fallback) ?? fallback;
+  const motionLabel = (id) => tr(`motions.${id}.label`, null, motionById.get(id)?.name || motions[0].name);
   const roundLengths = [3, 4, 5, 6, 7];
   const startingLives = 3;
   const pointsPerMove = 10;
@@ -46,12 +54,12 @@
 
   const keys = [...els.keypad.querySelectorAll('.echo-key')];
   const phaseLabels = {
-    idle: 'Ready',
-    watching: 'Watch',
-    input: 'Your turn',
-    clear: 'Clear',
-    over: 'Game over',
-    victory: 'Victory'
+    idle: ['simulator.state.idle', 'Ready'],
+    watching: ['simulator.state.watching', 'Watch'],
+    input: ['simulator.state.input', 'Your turn'],
+    clear: ['simulator.state.clear', 'Clear'],
+    over: ['simulator.state.over', 'Game over'],
+    victory: ['simulator.state.victory', 'Victory']
   };
 
   let phase = 'idle';
@@ -62,6 +70,21 @@
   let cursor = 0;
   let playbackToken = 0;
   let feedbackTimer = 0;
+  let currentMotionId = 'stand';
+  let messageState = {
+    key: 'simulator.message.ready',
+    params: {},
+    tone: 'info',
+    fallback: 'Press Start game when you are ready.',
+    detail: null
+  };
+  let captionState = {
+    key: 'simulator.caption.initial',
+    params: {},
+    fallback: 'Watch the stage, then repeat the phrase.'
+  };
+  let progressState = { length: 0, filled: 0, mode: 'idle' };
+  let primaryState = { action: 'start' };
 
   function sleep(milliseconds) {
     return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
@@ -87,27 +110,63 @@
     return next;
   }
 
+  function resolveParams(params = {}) {
+    const resolved = { ...params };
+    if (params.motionId) resolved.motion = motionLabel(params.motionId);
+    if (params.pressedId) resolved.pressed = motionLabel(params.pressedId);
+    if (params.expectedId) resolved.expected = motionLabel(params.expectedId);
+    if (params.remaining !== undefined && !params.unit) {
+      resolved.unit = params.remaining === 1
+        ? tr('simulator.unit.move', null, 'move')
+        : tr('simulator.unit.moves', null, 'moves');
+    }
+    return resolved;
+  }
+
+  function renderMessage() {
+    let text = tr(messageState.key, resolveParams(messageState.params), messageState.fallback);
+    if (messageState.detail) {
+      const detail = tr(
+        messageState.detail.key,
+        resolveParams(messageState.detail.params),
+        messageState.detail.fallback
+      );
+      if (detail) text += ` ${detail}`;
+    }
+    els.message.textContent = text;
+    els.message.dataset.tone = messageState.tone;
+  }
+
+  function setMessage(key, params = {}, tone = 'info', fallback = '', detail = null) {
+    messageState = { key, params, tone, fallback, detail };
+    renderMessage();
+  }
+
+  function renderCaption() {
+    els.stageCaption.textContent = tr(captionState.key, resolveParams(captionState.params), captionState.fallback);
+  }
+
+  function setCaption(key, params = {}, fallback = '') {
+    captionState = { key, params, fallback };
+    renderCaption();
+  }
+
   function setPhase(nextPhase) {
     phase = nextPhase;
     game.dataset.state = nextPhase;
     els.state.dataset.state = nextPhase;
-    els.state.textContent = phaseLabels[nextPhase] || 'Ready';
-  }
-
-  function setMessage(text, tone = 'info') {
-    els.message.textContent = text;
-    els.message.dataset.tone = tone;
-  }
-
-  function setCaption(text) {
-    els.stageCaption.textContent = text;
+    const [key, fallback] = phaseLabels[nextPhase] || phaseLabels.idle;
+    els.state.textContent = tr(key, null, fallback);
   }
 
   function updateHud() {
     els.round.textContent = String(roundIndex + 1).padStart(2, '0');
     els.score.textContent = paddedScore(score + (phase === 'input' ? cursor * pointsPerMove : 0));
     els.lives.textContent = '●'.repeat(lives) + '○'.repeat(startingLives - lives);
-    els.lives.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} left`);
+    const unit = lives === 1
+      ? tr('simulator.lifeOne', null, 'life')
+      : tr('simulator.lifeMany', null, 'lives');
+    els.lives.setAttribute('aria-label', tr('simulator.livesAria', { count: lives, unit }, `${lives} ${unit} left`));
   }
 
   function setKeysEnabled(enabled) {
@@ -117,10 +176,22 @@
     });
   }
 
-  function showPrimary(label, action) {
+  const primaryLabels = {
+    start: ['simulator.actions.start', 'Start game'],
+    next: ['simulator.actions.next', 'Next round'],
+    'play-again': ['simulator.actions.playAgain', 'Play again']
+  };
+
+  function renderPrimary() {
+    const [key, fallback] = primaryLabels[primaryState.action] || primaryLabels.start;
+    els.primary.textContent = tr(key, null, fallback);
+  }
+
+  function showPrimary(action) {
     els.primary.hidden = false;
-    els.primary.textContent = label;
     els.primary.dataset.action = action;
+    primaryState = { action };
+    renderPrimary();
   }
 
   function hidePrimary() {
@@ -135,12 +206,47 @@
     els.replay.hidden = true;
   }
 
-  function setProgress(length, filled = 0, mode = 'input') {
-    const label = mode === 'watch'
-      ? (filled ? `Watching move ${filled} of ${length}` : `Watching ${length} moves`)
-      : `${filled} of ${length} moves repeated`;
+  function refreshKeyLabels() {
+    keys.forEach((button, index) => {
+      const id = button.dataset.motion;
+      const label = motionLabel(id);
+      const name = button.querySelector('.echo-key-name');
+      if (name) name.textContent = label;
+      button.setAttribute('aria-label', tr('simulator.key.aria', { number: index + 1, motion: label }, `Move ${index + 1}: ${motionFor(id).name}`));
+    });
+  }
+
+  function refreshLanguage() {
+    renderMessage();
+    renderCaption();
+    renderProgress();
+    setPhase(phase);
+    updateHud();
+    renderPrimary();
+    refreshKeyLabels();
+    if (currentMotionId) {
+      const label = motionLabel(currentMotionId);
+      els.stageLabel.textContent = label;
+      els.stickman.setAttribute('aria-label', tr('motions.simAria', { motion: label }, `Stickman performing ${label}`));
+    }
+  }
+
+  function renderProgress() {
+    const { length, filled, mode } = progressState;
+    let label = tr('simulator.progress.none', null, 'No moves entered');
+    if (mode === 'watch') {
+      label = filled
+        ? tr('simulator.progress.watchingMove', { filled, length }, `Watching move ${filled} of ${length}`)
+        : tr('simulator.progress.watching', { length }, `Watching ${length} moves`);
+    } else if (mode !== 'idle') {
+      label = tr('simulator.progress.repeated', { filled, length }, `${filled} of ${length} moves repeated`);
+    }
     els.progress.dataset.mode = mode;
     els.progress.setAttribute('aria-label', label);
+    if (!length) {
+      els.progress.replaceChildren();
+      return;
+    }
     els.progress.replaceChildren(
       ...Array.from({ length }, (_, index) => {
         const pip = document.createElement('span');
@@ -152,10 +258,14 @@
     );
   }
 
+  function setProgress(length, filled = 0, mode = 'input') {
+    progressState = { length, filled, mode };
+    renderProgress();
+  }
+
   function resetProgress() {
-    els.progress.dataset.mode = 'idle';
-    els.progress.setAttribute('aria-label', 'No moves entered');
-    els.progress.replaceChildren();
+    progressState = { length: 0, filled: 0, mode: 'idle' };
+    renderProgress();
   }
 
   function motionFor(id) {
@@ -164,10 +274,12 @@
 
   function renderMotion(id) {
     const motion = motionFor(id);
+    currentMotionId = id;
+    const label = motionLabel(id);
     els.stage.dataset.motion = id;
     els.pose.innerHTML = motion.art;
-    els.stageLabel.textContent = motion.name;
-    els.stickman.setAttribute('aria-label', `Stickman performing ${motion.name}`);
+    els.stageLabel.textContent = label;
+    els.stickman.setAttribute('aria-label', tr('motions.simAria', { motion: label }, `Stickman performing ${motion.name}`));
 
     if (reduceMotion.matches) return;
     els.pose.classList.remove('is-pop');
@@ -198,7 +310,7 @@
     hidePrimary();
     hideReplay();
     setFeedback('watching');
-    setCaption(`Watch ${sequence.length} moves.`);
+    setCaption('simulator.caption.watchCount', { count: sequence.length }, `Watch ${sequence.length} moves.`);
     setProgress(sequence.length, 0, 'watch');
 
     for (let index = 0; index < sequence.length; index += 1) {
@@ -206,7 +318,7 @@
       const id = sequence[index];
       renderMotion(id);
       setProgress(sequence.length, index + 1, 'watch');
-      setCaption(`Watch move ${index + 1} of ${sequence.length}.`);
+      setCaption('simulator.caption.watchMove', { index: index + 1, total: sequence.length }, `Watch move ${index + 1} of ${sequence.length}.`);
       playTone(id);
       await sleep(poseHold);
       if (token !== playbackToken) return false;
@@ -225,8 +337,8 @@
     setFeedback(null);
     setKeysEnabled(true);
     showReplay();
-    setCaption(`Your turn: repeat ${sequence.length} moves.`);
-    setMessage(`Your turn — repeat all ${sequence.length} moves from the start.`, 'info');
+    setCaption('simulator.caption.yourTurn', { count: sequence.length }, `Your turn: repeat ${sequence.length} moves.`);
+    setMessage('simulator.message.yourTurn', { count: sequence.length }, 'info', `Your turn — repeat all ${sequence.length} moves from the start.`);
     setProgress(sequence.length, 0, 'input');
     const firstKey = keys.find((button) => !button.disabled);
     if (firstKey) firstKey.focus({ preventScroll: true });
@@ -236,8 +348,8 @@
     sequence = buildSequence(roundLengths[roundIndex]);
     cursor = 0;
     updateHud();
-    setMessage(`Round ${roundIndex + 1}: watch ${sequence.length} moves.`, 'info');
-    setCaption('Watch closely. The phrase is about to begin.');
+    setMessage('simulator.message.round', { round: roundIndex + 1, count: sequence.length }, 'info', `Round ${roundIndex + 1}: watch ${sequence.length} moves.`);
+    setCaption('simulator.caption.watchClosely', {}, 'Watch closely. The phrase is about to begin.');
     resetProgress();
     const token = ++playbackToken;
     playSequence(token);
@@ -247,7 +359,7 @@
     if (phase !== 'input' || !sequence.length) return;
     cursor = 0;
     updateHud();
-    setMessage('Watching the same phrase again. No try is lost.', 'info');
+    setMessage('simulator.message.replay', {}, 'info', 'Watching the same phrase again. No try is lost.');
     const token = ++playbackToken;
     playSequence(token);
   }
@@ -267,10 +379,12 @@
 
     const motion = motionFor(id);
     const remaining = sequence.length - cursor;
-    setCaption(`Good — ${cursor} of ${sequence.length}.`);
+    setCaption('simulator.caption.good', { cursor, total: sequence.length }, `Good — ${cursor} of ${sequence.length}.`);
     setMessage(
-      `Good — ${motion.name}. ${remaining} ${remaining === 1 ? 'move' : 'moves'} to go.`,
-      'good'
+      'simulator.message.good',
+      { motionId: id, remaining },
+      'good',
+      `Good — ${motion.name}. ${remaining} ${remaining === 1 ? 'move' : 'moves'} to go.`
     );
   }
 
@@ -284,10 +398,14 @@
     renderMotion(id);
     setFeedback('wrong', 650);
     setProgress(sequence.length, 0, 'input');
-    setCaption(`Not quite — ${pressed.name} was not the next move.`);
+    setCaption('simulator.caption.notQuite', { pressedId: id }, `Not quite — ${pressed.name} was not the next move.`);
 
     if (lives === 0) {
-      endGame(`The last input was ${pressed.name}; the phrase needed ${expected.name}.`);
+      endGame({
+        key: 'simulator.detail.lastInput',
+        params: { pressedId: id, expectedId: sequence[expectedIndex] },
+        fallback: `The last input was ${pressed.name}; the phrase needed ${expected.name}.`
+      });
       return;
     }
 
@@ -295,8 +413,10 @@
     setKeysEnabled(true);
     showReplay();
     setMessage(
-      `Not quite — you pressed ${pressed.name}. At step ${expectedIndex + 1}, the phrase was ${expected.name}. The sequence is reset: watch again or try from the start.`,
-      'bad'
+      'simulator.message.wrong',
+      { pressedId: id, step: expectedIndex + 1, expectedId: sequence[expectedIndex] },
+      'bad',
+      `Not quite — you pressed ${pressed.name}. At step ${expectedIndex + 1}, the phrase was ${expected.name}. The sequence is reset: watch again or try from the start.`
     );
   }
 
@@ -316,12 +436,14 @@
     }
 
     setPhase('clear');
-    setCaption(`Round ${roundIndex + 1} clear.`);
+    setCaption('simulator.caption.roundClear', { round: roundIndex + 1 }, `Round ${roundIndex + 1} clear.`);
     setMessage(
-      `Round ${roundIndex + 1} clear. +${points} points. Take a breath, then choose Next round.`,
-      'good'
+      'simulator.message.roundClear',
+      { round: roundIndex + 1, points },
+      'good',
+      `Round ${roundIndex + 1} clear. +${points} points. Take a breath, then choose Next round.`
     );
-    showPrimary('Next round', 'next');
+    showPrimary('next');
     els.primary.focus({ preventScroll: true });
   }
 
@@ -330,26 +452,31 @@
     setKeysEnabled(false);
     hideReplay();
     setFeedback('clear');
-    setCaption('All five rounds echoed.');
+    setCaption('simulator.caption.victory', {}, 'All five rounds echoed.');
     setMessage(
-      `Round 5 clear. +${points} points. Final score: ${score}. You echoed every phrase.`,
-      'good'
+      'simulator.message.victory',
+      { points, score },
+      'good',
+      `Round 5 clear. +${points} points. Final score: ${score}. You echoed every phrase.`
     );
-    showPrimary('Play again', 'play-again');
+    showPrimary('play-again');
     els.primary.focus({ preventScroll: true });
   }
 
-  function endGame(detail = '') {
+  function endGame(detail = null) {
     setPhase('over');
     setKeysEnabled(false);
     hideReplay();
     setFeedback('over');
-    setCaption(`The run ends in round ${roundIndex + 1}.`);
+    setCaption('simulator.caption.gameOver', { round: roundIndex + 1 }, `The run ends in round ${roundIndex + 1}.`);
     setMessage(
-      `Game over — final score ${score}. You reached round ${roundIndex + 1} of ${roundLengths.length}.${detail ? ` ${detail}` : ''}`,
-      'bad'
+      'simulator.message.gameOver',
+      { score, round: roundIndex + 1, total: roundLengths.length },
+      'bad',
+      `Game over — final score ${score}. You reached round ${roundIndex + 1} of ${roundLengths.length}.`,
+      detail
     );
-    showPrimary('Play again', 'play-again');
+    showPrimary('play-again');
     els.primary.focus({ preventScroll: true });
   }
 
@@ -384,9 +511,10 @@
     renderMotion('stand');
     setPhase('idle');
     setKeysEnabled(false);
-    showPrimary('Start game', 'start');
-    setCaption('Watch the stage, then repeat the phrase.');
-    setMessage('Press Start game when you are ready.', 'info');
+    showPrimary('start');
+    setCaption('simulator.caption.initial', {}, 'Watch the stage, then repeat the phrase.');
+    setMessage('simulator.message.ready', {}, 'info', 'Press Start game when you are ready.');
+    refreshKeyLabels();
   }
 
   function pressMotion(id) {
@@ -438,5 +566,6 @@
     pressMotion(motionIds[index]);
   });
 
+  document.addEventListener('languagechange', refreshLanguage);
   resetGame();
 })();

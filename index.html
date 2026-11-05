@@ -1,55 +1,62 @@
 ﻿<!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stickman Motion Simulator | Home</title>
-  <meta name="description" content="A bright, playful home for exploring stickman movement.">
+  <title data-i18n="meta.home.title">Stickman Motion Simulator | Home</title>
+  <meta name="description" content="A bright, playful home for exploring stickman movement." data-i18n-content="meta.home.description">
   <meta name="theme-color" content="#f7f3e8">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Stickman Motion Simulator">
-  <meta property="og:description" content="Explore movement through bright color-block portraits and playful motion studies.">
+  <meta property="og:title" content="Stickman Motion Simulator" data-i18n-content="meta.home.ogTitle">
+  <meta property="og:description" content="Explore movement through bright color-block portraits and playful motion studies." data-i18n-content="meta.home.ogDescription">
   <meta property="og:url" content="https://example.com/stickman-motion-simulator/">
   <meta property="og:image" content="https://example.com/stickman-motion-simulator/og-image.svg">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%232148d8'/%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ffd21f'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
 </head>
 <body class="home-page">
-  <a class="skip-link" href="#home-main">Skip to content</a>
+  <a class="skip-link" href="#home-main" data-i18n="common.skip">Skip to content</a>
   <header class="site-header home-header">
-    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
-    <nav aria-label="Primary navigation">
-      <a aria-current="page" href="index.html">Home</a><a href="simulator.html">Simulator</a><a href="gallery.html">Gallery</a><a href="animator.html">Animator</a><a href="about.html">About</a>
+    <a class="brand" href="index.html" aria-label="Stickman Motion Simulator home" data-i18n-aria-label="common.brandHome"><span class="brand-mark" aria-hidden="true">✦</span><span>Stickman Motion</span></a>
+    <nav aria-label="Primary navigation" data-i18n-aria-label="common.primaryNav">
+      <a aria-current="page" href="index.html" data-i18n="common.nav.home">Home</a><a href="simulator.html" data-i18n="common.nav.simulator">Simulator</a><a href="gallery.html" data-i18n="common.nav.gallery">Gallery</a><a href="animator.html" data-i18n="common.nav.animator">Animator</a><a href="about.html" data-i18n="common.nav.about">About</a>
     </nav>
+    <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="common.language">
+      <button type="button" data-language="zh-CN" lang="zh-CN" aria-label="简体中文" data-i18n-aria-label="common.switchToChinese" aria-pressed="true">中文</button>
+      <span class="language-separator" aria-hidden="true">|</span>
+      <button type="button" data-language="en" lang="en" aria-label="English" data-i18n-aria-label="common.switchToEnglish" aria-pressed="false">EN</button>
+    </div>
+
   </header>
 
   <main id="home-main" class="home-canvas">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="home-copy">
-        <p class="home-kicker">Stickman Motion · A tiny movement museum</p>
-        <h1 id="home-title">Find your<br><span>funny walk.</span></h1>
-        <p class="home-lede">A bright study of balance, rhythm, and the small choices that turn a pose into a personality. Step into the lab, browse the poses, or take the rig for a spin.</p>
+        <p class="home-kicker" data-i18n="home.kicker">Stickman Motion · A tiny movement museum</p>
+        <h1 id="home-title" data-i18n-html="home.title">Find your<br><span>funny walk.</span></h1>
+        <p class="home-lede" data-i18n="home.lede">A bright study of balance, rhythm, and the small choices that turn a pose into a personality. Step into the lab, browse the poses, or take the rig for a spin.</p>
         <div class="home-actions">
-          <a class="button button-primary" href="simulator.html">Try the simulator <span aria-hidden="true">↗</span></a>
-          <a class="button button-secondary" href="animator.html">Meet the rig <span aria-hidden="true">↗</span></a>
+          <a class="button button-primary" href="simulator.html"><span data-i18n="home.trySimulator">Try the simulator</span> <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="animator.html"><span data-i18n="home.meetRig">Meet the rig</span> <span aria-hidden="true">↗</span></a>
         </div>
-        <dl class="home-stats" aria-label="Project facts">
-          <div><dt>07</dt><dd>motions</dd></div>
-          <div><dt>01</dt><dd>body</dd></div>
-          <div><dt>∞</dt><dd>rhythms</dd></div>
+        <dl class="home-stats" aria-label="Project facts" data-i18n-aria-label="home.statsAria">
+          <div><dt>07</dt><dd data-i18n="home.stats.motions">motions</dd></div>
+          <div><dt>01</dt><dd data-i18n="home.stats.body">body</dd></div>
+          <div><dt>∞</dt><dd data-i18n="home.stats.rhythms">rhythms</dd></div>
         </dl>
       </div>
 
       <div class="home-stage">
         <div class="home-stage-top">
-          <span class="stage-index">Portrait / 01</span>
-          <span class="home-counter">07 motions · 01 body</span>
+          <span class="stage-index" data-i18n="home.stage.index">Portrait / 01</span>
+          <span class="home-counter" data-i18n="home.stage.counter">07 motions · 01 body</span>
         </div>
         <div class="portrait-wrap">
-          <p class="portrait-label">Hello, mover!</p>
-          <svg id="home-portrait" class="portrait" viewBox="0 0 520 580" role="button" tabindex="0" aria-label="Change the portrait's mood" aria-describedby="portrait-desc">
-            <title id="portrait-title">A bright color-block portrait</title>
-            <desc id="portrait-desc">A playful head made from cobalt blue, tomato red, orange, green, and purple shapes.</desc>
+          <p class="portrait-label" data-i18n="home.portrait.label">Hello, mover!</p>
+          <svg id="home-portrait" class="portrait" viewBox="0 0 520 580" role="button" tabindex="0" aria-label="Change the portrait's mood" aria-describedby="portrait-desc" data-i18n-aria-label="home.portrait.aria">
+            <title id="portrait-title" data-i18n="home.portrait.title">A bright color-block portrait</title>
+            <desc id="portrait-desc" data-i18n="home.portrait.desc">A playful head made from cobalt blue, tomato red, orange, green, and purple shapes.</desc>
             <path fill="#2148d8" d="M92 235C85 105 170 34 286 42c115 8 162 95 137 196-36-38-70-51-118-47-77 6-133 41-213 44z"/>
             <path fill="#f04438" d="M92 188c49-20 92-58 102-117 51 24 113 31 173 17 2 50 24 94 74 119-5 80-60 145-150 145-111 0-177-61-199-164z"/>
             <circle fill="#ffb58a" cx="265" cy="271" r="143"/>
@@ -63,53 +70,53 @@
         </div>
         <div class="home-stage-bottom">
           <aside id="home-dialogue" class="home-dialogue" aria-live="polite">
-            <span>VOICE NOTE</span>
+            <span data-i18n="home.dialogue.label">VOICE NOTE</span>
             <strong>“Every body has a rhythm.”</strong>
-            <button id="portrait-mood" type="button" aria-label="Change portrait mood">Change mood ↻</button>
+            <button id="portrait-mood" type="button" aria-label="Change portrait mood" data-i18n-aria-label="home.dialogue.changeMoodAria"><span data-i18n="home.dialogue.changeMood">Change mood</span> <span aria-hidden="true">↻</span></button>
           </aside>
-          <div class="home-note-triggers" aria-label="Field notes">
-            <button class="bubble-note home-note" type="button" aria-controls="home-dialogue" data-message="Six simple poses. Infinite little stories.">What is this? <span aria-hidden="true">+</span></button>
-            <button class="bubble-note bubble-note-two home-note" type="button" aria-controls="home-dialogue" data-message="Click a pose, watch it change, and make the web feel alive.">How to play? <span aria-hidden="true">+</span></button>
+          <div class="home-note-triggers" aria-label="Field notes" data-i18n-aria-label="home.notesAria">
+            <button class="bubble-note home-note" type="button" aria-controls="home-dialogue" data-message="Six simple poses. Infinite little stories." data-message-key="home.notes.whatMessage"><span data-i18n="home.notes.what">What is this?</span> <span aria-hidden="true">+</span></button>
+            <button class="bubble-note bubble-note-two home-note" type="button" aria-controls="home-dialogue" data-message="Click a pose, watch it change, and make the web feel alive." data-message-key="home.notes.howMessage"><span data-i18n="home.notes.how">How to play?</span> <span aria-hidden="true">+</span></button>
           </div>
-          <p class="stage-help">Click the portrait to change its mood.</p>
+          <p class="stage-help" data-i18n="home.stage.help">Click the portrait to change its mood.</p>
         </div>
       </div>
     </section>
 
     <section class="home-explore" aria-labelledby="explore-title">
       <div class="home-section-head">
-        <div><p class="eyebrow">Choose a room</p><h2 id="explore-title">Four ways into the motion.</h2></div>
-        <p>Play with a pose, study the vocabulary, build a rig, or read the notes behind the project.</p>
+        <div><p class="eyebrow" data-i18n="home.explore.eyebrow">Choose a room</p><h2 id="explore-title" data-i18n="home.explore.title">Four ways into the motion.</h2></div>
+        <p data-i18n="home.explore.desc">Play with a pose, study the vocabulary, build a rig, or read the notes behind the project.</p>
       </div>
-      <nav class="bubble-nav home-route-grid" aria-label="Explore the project">
-        <a class="bubble bubble-blue bubble-simulator route-card route-simulator" href="simulator.html"><span class="route-index">01 / Play</span><strong>Simulator</strong><span class="route-copy">Switch poses and watch the body find a new rhythm.</span><i aria-hidden="true">↗</i></a>
-        <a class="bubble bubble-yellow bubble-gallery route-card route-gallery" href="gallery.html"><span class="route-index">02 / Browse</span><strong>Gallery</strong><span class="route-copy">Seven poses, one bright visual vocabulary.</span><i aria-hidden="true">↗</i></a>
-        <a class="bubble bubble-purple bubble-animator route-card route-animator" href="animator.html"><span class="route-index">03 / Pose</span><strong>Animator</strong><span class="route-copy">Grab a joint and build a side-view movement study.</span><i aria-hidden="true">↗</i></a>
-        <a class="bubble bubble-green bubble-about route-card route-about" href="about.html"><span class="route-index">04 / Read</span><strong>The project</strong><span class="route-copy">The ideas, constraints, and small experiments behind the motion.</span><i aria-hidden="true">↗</i></a>
+      <nav class="bubble-nav home-route-grid" aria-label="Explore the project" data-i18n-aria-label="home.routesAria">
+        <a class="bubble bubble-blue bubble-simulator route-card route-simulator" href="simulator.html"><span class="route-index" data-i18n="home.routes.simulator.index">01 / Play</span><strong data-i18n="home.routes.simulator.title">Simulator</strong><span class="route-copy" data-i18n="home.routes.simulator.copy">Switch poses and watch the body find a new rhythm.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-yellow bubble-gallery route-card route-gallery" href="gallery.html"><span class="route-index" data-i18n="home.routes.gallery.index">02 / Browse</span><strong data-i18n="home.routes.gallery.title">Gallery</strong><span class="route-copy" data-i18n="home.routes.gallery.copy">Seven poses, one bright visual vocabulary.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-purple bubble-animator route-card route-animator" href="animator.html"><span class="route-index" data-i18n="home.routes.animator.index">03 / Pose</span><strong data-i18n="home.routes.animator.title">Animator</strong><span class="route-copy" data-i18n="home.routes.animator.copy">Grab a joint and build a side-view movement study.</span><i aria-hidden="true">↗</i></a>
+        <a class="bubble bubble-green bubble-about route-card route-about" href="about.html"><span class="route-index" data-i18n="home.routes.about.index">04 / Read</span><strong data-i18n="home.routes.about.title">The project</strong><span class="route-copy" data-i18n="home.routes.about.copy">The ideas, constraints, and small experiments behind the motion.</span><i aria-hidden="true">↗</i></a>
       </nav>
     </section>
 
     <section class="home-index" aria-labelledby="index-title">
       <div class="home-index-copy">
-        <p class="eyebrow">Movement vocabulary</p>
-        <h2 id="index-title">Seven ways to move.</h2>
-        <p>Every pose is a small decision about balance. Jump straight to one in the gallery.</p>
+        <p class="eyebrow" data-i18n="home.index.eyebrow">Movement vocabulary</p>
+        <h2 id="index-title" data-i18n="home.index.title">Seven ways to move.</h2>
+        <p data-i18n="home.index.desc">Every pose is a small decision about balance. Jump straight to one in the gallery.</p>
       </div>
       <ol class="motion-index">
-        <li><a href="gallery.html#motion-stand"><span>01</span><strong>Stand</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-walk"><span>02</span><strong>Walk</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-run"><span>03</span><strong>Run</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-jump"><span>04</span><strong>Jump</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-wave"><span>05</span><strong>Wave</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-squat"><span>06</span><strong>Squat</strong><i aria-hidden="true">↗</i></a></li>
-        <li><a href="gallery.html#motion-swim"><span>07</span><strong>Swim</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-stand"><span>01</span><strong data-i18n="motions.stand.label">Stand</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-walk"><span>02</span><strong data-i18n="motions.walk.label">Walk</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-run"><span>03</span><strong data-i18n="motions.run.label">Run</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-jump"><span>04</span><strong data-i18n="motions.jump.label">Jump</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-wave"><span>05</span><strong data-i18n="motions.wave.label">Wave</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-squat"><span>06</span><strong data-i18n="motions.squat.label">Squat</strong><i aria-hidden="true">↗</i></a></li>
+        <li><a href="gallery.html#motion-swim"><span>07</span><strong data-i18n="motions.swim.label">Swim</strong><i aria-hidden="true">↗</i></a></li>
       </ol>
     </section>
   </main>
 
   <footer class="site-footer home-footer page-shell">
-    <p>A student-made visual experiment in HTML · CSS · SVG · JavaScript.</p>
-    <p>© 2026 Stickman Motion Simulator</p>
+    <p data-i18n="common.footer.home">A student-made visual experiment in HTML · CSS · SVG · JavaScript.</p>
+    <p data-i18n="common.copyright">© 2026 Stickman Motion Simulator</p>
   </footer>
   <script src="script.js"></script>
 </body>
