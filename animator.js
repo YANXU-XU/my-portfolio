@@ -632,6 +632,29 @@
   const ankles = [...document.querySelectorAll('[data-ankle]')];
   const pickControls = [...document.querySelectorAll('.rig-pick')];
   const presetButtons = [...document.querySelectorAll('.preset-button')];
+  const recUi = {
+    state: document.querySelector('#rec-state'),
+    time: document.querySelector('#rec-time'),
+    total: document.querySelector('#rec-total'),
+    bar: document.querySelector('#rec-bar-fill'),
+    message: document.querySelector('#rec-message'),
+    name: document.querySelector('#rec-name'),
+    record: document.querySelector('#rec-record'),
+    pause: document.querySelector('#rec-pause'),
+    resume: document.querySelector('#rec-resume'),
+    stop: document.querySelector('#rec-stop'),
+    play: document.querySelector('#rec-play'),
+    replay: document.querySelector('#rec-replay'),
+    save: document.querySelector('#rec-save'),
+    poseName: document.querySelector('#pose-name'),
+    poseSave: document.querySelector('#pose-save'),
+    poseList: document.querySelector('#pose-list'),
+    poseCount: document.querySelector('#pose-count'),
+    recList: document.querySelector('#rec-list'),
+    recCount: document.querySelector('#rec-count'),
+    undo: document.querySelector('#animator-undo'),
+    redo: document.querySelector('#animator-redo')
+  };
 
   const state = {
     mode: 'idle',
@@ -643,7 +666,16 @@
     manual: false,
     raf: 0,
     lastTimestamp: 0,
-    drag: null
+    drag: null,
+    initial: null,
+    history: { undo: [], redo: [], pending: null, suppress: false, timer: 0 },
+    rec: { status: 'idle', frames: [], elapsed: 0, segmentStart: 0, lastCapture: 0, duration: 0 },
+    replay: { rec: null, raf: 0, time: 0, last: 0, status: 'idle' },
+    poseLibrary: [],
+    recLibrary: [],
+    editingRec: null,
+    corrupt: {},
+    storageAvailable: true
   };
 
   const tr = (key, params, fallback) => window.StickmanI18n?.t(key, params, fallback) ?? fallback;
@@ -655,6 +687,21 @@
   const selectedPart = () => partByName.get(state.selected) || partByName.get('torso');
   const activePreset = () => document.querySelector('.preset-button.is-active')?.dataset.preset || state.preset || 'stand';
   const currentClip = () => MOTION.CLIPS[state.preset] || MOTION.CLIPS.stand;
+
+  // Recording layer. The pure data helpers live in animator-recording-core.js.
+  const CORE = window.StickmanRecordingCore;
+  const POSE_STORE_KEY = 'stickman-animator-poses-v1';
+  const REC_STORE_KEY = 'stickman-animator-recordings-v1';
+  const REC_SAMPLE_MS = 33;
+  const REC_MAX_MS = 60000;
+  const REC_MAX_FRAMES = 1800;
+  const HISTORY_LIMIT = 60;
+  const POSE_LIMIT = 50;
+  const REC_LIMIT = 40;
+  if (!CORE) {
+    console.warn('animator: animator-recording-core.js is missing, pose tools are disabled.');
+    return;
+  }
 
   const ticks = [];
   for (let index = 0; index < 40; index += 1) {
@@ -675,7 +722,14 @@
     const fallbackName = state.preset[0].toUpperCase() + state.preset.slice(1);
     const presetLabel = tr(`motions.${state.preset}.label`, null, fallbackName);
     const clip = currentClip();
-    if (state.mode === 'playing') {
+    if (state.replay.status === 'playing' || state.replay.status === 'paused' || state.replay.status === 'ended') {
+      const replayName = state.replay.rec ? state.replay.rec.name : presetLabel;
+      setStatus(state.replay.status === 'ended'
+        ? tr('animator.status.replayEnded', { name: replayName }, `${replayName} playback finished`)
+        : tr('animator.status.replay', { name: replayName }, `Replaying ${replayName}`));
+    } else if (state.rec.status === 'recording' || state.rec.status === 'paused') {
+      setStatus(tr('animator.status.recording', { time: CORE.formatDuration(state.rec.elapsed) }, 'Recording'));
+    } else if (state.mode === 'playing') {
       const playback = clip.loop
         ? tr('animator.playback.loop', null, 'loop')
         : tr('animator.playback.once', null, 'once');
@@ -825,6 +879,7 @@
     shadow.setAttribute('ry', String(5 * shadowScale));
     shadow.setAttribute('opacity', String(0.14 * shadowScale));
     syncControls();
+    captureFrameIfRecording();
   }
 
   function stopRaf() {
@@ -833,6 +888,8 @@
   }
 
   function startPlayback(name, options = {}) {
+    if (isReplaying()) return;
+    clearEndedReplay();
     const clipName = MOTION.CLIPS[name] ? name : 'walk';
     const fromStart = options.fromStart !== false;
     const canResume = !fromStart && state.mode === 'paused' && state.preset === clipName && !state.manual;
@@ -891,6 +948,10 @@
   }
 
   function resetPose() {
+    if (isReplaying()) return;
+    clearEndedReplay();
+    commitPending();
+    pushHistory(snapshotOf());
     stopRaf();
     state.mode = 'idle';
     state.preset = 'stand';
@@ -898,11 +959,15 @@
     state.manual = false;
     state.drag = null;
     state.selected = 'torso';
-    state.pose = MOTION.samplePose('stand', 0);
+    state.history.suppress = true;
+    state.pose = CORE.fromSnapshot(state.initial, MOTION.samplePose('stand', 0));
+    refreshFootData();
     setActivePreset('stand');
     render();
     selectPart('torso');
     refreshStatus();
+    state.history.suppress = false;
+    updateHistoryButtons();
   }
 
   function pointerAngle(part, event) {
@@ -912,11 +977,13 @@
   }
 
   function beginDrag(name, target, event) {
+    if (isReplaying()) return;
     if (event.button !== undefined && event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
     const part = partByName.get(name);
     if (!part) return;
+    clearEndedReplay();
     selectPart(name);
     state.drag = {
       name,
@@ -928,6 +995,7 @@
   }
 
   function updateDrag(name, event) {
+    if (isReplaying()) return;
     const drag = state.drag;
     if (!drag || drag.name !== name) return;
     event.preventDefault();
@@ -938,6 +1006,8 @@
     if (!drag.active) {
       if (Math.abs(delta) < 1.5) return;
       drag.active = true;
+      commitPending();
+      state.history.pending = snapshotOf();
       drag.angle = partAngle(name);
       if (state.mode === 'playing') stopRaf();
       state.mode = 'manual';
@@ -949,11 +1019,20 @@
   }
 
   function endDrag() {
+    const drag = state.drag;
     state.drag = null;
+    if (drag && drag.active) commitPending();
   }
 
   function applyControlAngle(event) {
+    if (isReplaying()) return;
     if (!state.selected) return;
+    clearEndedReplay();
+    if (!state.history.pending) {
+      state.history.pending = snapshotOf();
+      window.clearTimeout(state.history.timer);
+      state.history.timer = window.setTimeout(commitPending, 600);
+    }
     if (state.mode === 'playing') {
       stopRaf();
       state.mode = 'paused';
@@ -984,6 +1063,726 @@
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
     exportState = 'done';
     refreshExportStatus();
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Recording, playback, history and persistence.
+   * ------------------------------------------------------------------ */
+
+  const snapshotOf = () => CORE.toSnapshot(state.pose);
+  const isRecording = () => state.rec.status === 'recording' || state.rec.status === 'paused';
+  const isReplaying = () => state.replay.status === 'playing' || state.replay.status === 'paused';
+  const hasDraft = () => state.rec.status === 'stopped' && state.rec.frames.length > 1;
+
+  // A finished replay keeps the status line busy, so the first edit clears it.
+  // The clip itself stays loaded so Play still replays it from the start.
+  function clearEndedReplay() {
+    if (state.replay.status !== 'ended') return;
+    state.replay.status = 'idle';
+    state.replay.time = 0;
+    refreshRecordingUi();
+  }
+
+  function setDisabled(element, disabled) {
+    if (!element) return;
+    element.disabled = Boolean(disabled);
+    element.setAttribute('aria-disabled', String(Boolean(disabled)));
+  }
+
+  function setMessage(text, tone) {
+    if (!recUi.message) return;
+    recUi.message.textContent = text || '';
+    if (tone) recUi.message.dataset.tone = tone;
+    else recUi.message.removeAttribute('data-tone');
+  }
+
+  function setMessageKey(key, params, fallback, tone) {
+    setMessage(tr(key, params, fallback), tone);
+  }
+
+  /* History ---------------------------------------------------------- */
+
+  function updateHistoryButtons() {
+    const locked = isRecording() || isReplaying();
+    setDisabled(recUi.undo, locked || !state.history.undo.length);
+    setDisabled(recUi.redo, locked || !state.history.redo.length);
+  }
+
+  function pushHistory(snapshot) {
+    if (!snapshot || state.history.suppress || isRecording()) return;
+    const undo = state.history.undo;
+    const last = undo[undo.length - 1];
+    if (last && CORE.sameSnapshot(last, snapshot)) return;
+    undo.push(snapshot);
+    if (undo.length > HISTORY_LIMIT) undo.shift();
+    state.history.redo.length = 0;
+    updateHistoryButtons();
+  }
+
+  function commitPending() {
+    if (state.history.timer) {
+      window.clearTimeout(state.history.timer);
+      state.history.timer = 0;
+    }
+    const pending = state.history.pending;
+    state.history.pending = null;
+    if (!pending) return;
+    if (CORE.sameSnapshot(pending, snapshotOf())) return;
+    pushHistory(pending);
+  }
+
+  function applySnapshot(snapshot) {
+    if (!snapshot) return;
+    clearEndedReplay();
+    state.history.suppress = true;
+    state.pose = CORE.fromSnapshot(snapshot, state.pose);
+    refreshFootData();
+    state.mode = 'manual';
+    state.manual = true;
+    if (MOTION.CLIPS[state.pose.name]) state.preset = state.pose.name;
+    setActivePreset(state.preset);
+    render();
+    refreshStatus();
+    state.history.suppress = false;
+  }
+
+  function undoPose() {
+    if (isRecording() || isReplaying()) return;
+    // Fold any slider drag that is still inside its debounce window into the
+    // stack first, otherwise the delayed commit would clobber the redo entry.
+    commitPending();
+    const previous = state.history.undo.pop();
+    if (!previous) return;
+    state.history.redo.push(snapshotOf());
+    applySnapshot(previous);
+    updateHistoryButtons();
+  }
+
+  function redoPose() {
+    if (isRecording() || isReplaying()) return;
+    commitPending();
+    const next = state.history.redo.pop();
+    if (!next) return;
+    state.history.undo.push(snapshotOf());
+    applySnapshot(next);
+    updateHistoryButtons();
+  }
+
+  /* Recording -------------------------------------------------------- */
+
+  function recordingTime(timestamp) {
+    const now = Number.isFinite(timestamp) ? timestamp : performance.now();
+    if (state.rec.status === 'recording') return state.rec.elapsed + (now - state.rec.segmentStart);
+    return state.rec.elapsed;
+  }
+
+  function defaultRecordingName() {
+    return tr('animator.rec.defaultName', { n: state.recLibrary.length + 1 }, `Recording ${state.recLibrary.length + 1}`);
+  }
+
+  function pushFrame(time, snapshot) {
+    if (!snapshot) return false;
+    const frames = state.rec.frames;
+    const previous = frames[frames.length - 1];
+    if (previous && CORE.sameSnapshot(previous.s, snapshot)) return false;
+    const safeTime = previous && time <= previous.t ? previous.t + 1 : Math.max(0, Math.round(time));
+    frames.push({ t: safeTime, s: snapshot });
+    return true;
+  }
+
+  // Called from render() so every pose change (drag, slider, preset tick) is
+  // sampled. Identical poses are skipped to keep recordings small.
+  function captureFrameIfRecording(force) {
+    if (state.rec.status !== 'recording' || isReplaying()) return;
+    const timestamp = performance.now();
+    if (!force && timestamp - state.rec.lastCapture < REC_SAMPLE_MS) return;
+    state.rec.lastCapture = timestamp;
+    const elapsed = recordingTime(timestamp);
+    pushFrame(elapsed, snapshotOf());
+    if (elapsed >= REC_MAX_MS || state.rec.frames.length >= REC_MAX_FRAMES) {
+      stopRecording();
+      setMessageKey('animator.rec.limit', null, 'Maximum recording length reached; recording stopped automatically.');
+      return;
+    }
+    refreshRecordingUi();
+  }
+
+  function startRecording() {
+    if (isRecording() || isReplaying()) return;
+    if (hasDraft() && !window.confirm(tr('animator.rec.confirmDiscard', null, 'The current recording is unsaved and will be discarded.'))) return;
+    clearEndedReplay();
+    commitPending();
+    state.rec.status = 'recording';
+    state.rec.frames = [];
+    state.rec.elapsed = 0;
+    state.rec.duration = 0;
+    state.rec.segmentStart = performance.now();
+    state.rec.lastCapture = 0;
+    state.replay.rec = null;
+    state.replay.status = 'idle';
+    state.replay.time = 0;
+    if (recUi.name && !recUi.name.value.trim()) recUi.name.value = defaultRecordingName();
+    pushFrame(0, snapshotOf());
+    setMessageKey('animator.rec.started', null, 'Recording started. Drag joints or play a preset — everything is captured.');
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function pauseRecording() {
+    if (state.rec.status !== 'recording') return;
+    state.rec.elapsed = Math.max(state.rec.elapsed, Math.round(recordingTime()));
+    state.rec.status = 'paused';
+    pushFrame(state.rec.elapsed, snapshotOf());
+    setMessageKey('animator.rec.pauseNote', null, 'Paused: adjustments made now are not recorded.');
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function resumeRecording() {
+    if (state.rec.status !== 'paused') return;
+    state.rec.status = 'recording';
+    state.rec.segmentStart = performance.now();
+    state.rec.lastCapture = 0;
+    setMessageKey('animator.rec.resumed', null, 'Recording resumed.');
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function stopRecording() {
+    if (!isRecording()) return;
+    if (state.rec.status === 'recording') {
+      state.rec.elapsed = Math.max(state.rec.elapsed, Math.round(recordingTime()));
+    }
+    state.rec.status = 'stopped';
+    pushFrame(state.rec.elapsed, snapshotOf());
+    const frames = state.rec.frames;
+    const first = frames[0];
+    const moved = frames.some((frame) => !CORE.sameSnapshot(first.s, frame.s));
+    if (!moved || CORE.durationOf(frames) < 120) {
+      state.rec.frames = [];
+      state.rec.status = 'idle';
+      state.rec.elapsed = 0;
+      state.rec.duration = 0;
+      setMessageKey('animator.rec.empty', null, 'The recording is empty — no pose change was detected.');
+      refreshRecordingUi();
+      refreshStatus();
+      return;
+    }
+    state.rec.duration = CORE.durationOf(frames);
+    state.replay.rec = draftRecording();
+    setMessageKey('animator.rec.ready', { duration: CORE.formatDuration(state.rec.duration) }, 'Recording ready. Play it back or save it.');
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function draftRecording() {
+    if (!state.rec.frames.length) return null;
+    return {
+      id: 'draft',
+      name: (recUi.name && recUi.name.value.trim()) || defaultRecordingName(),
+      createdAt: Date.now(),
+      duration: CORE.durationOf(state.rec.frames),
+      frames: state.rec.frames
+    };
+  }
+
+  /* Playback --------------------------------------------------------- */
+
+  function playbackTarget() {
+    if (state.replay.rec && Array.isArray(state.replay.rec.frames) && state.replay.rec.frames.length > 1) return state.replay.rec;
+    return hasDraft() ? draftRecording() : null;
+  }
+
+  // Read-only replay: manual rig input, presets and history stay locked.
+  function setEditorEnabled(enabled) {
+    const controls = [
+      angleInput,
+      inlineAngle,
+      ...presetButtons,
+      document.querySelector('#animator-play'),
+      document.querySelector('#animator-stop'),
+      document.querySelector('#animator-reset'),
+      recUi.undo,
+      recUi.redo
+    ];
+    controls.forEach((control) => {
+      if (control) setDisabled(control, !enabled);
+    });
+    partPicker?.querySelectorAll('button').forEach((button) => setDisabled(button, !enabled));
+    if (enabled) {
+      updateHistoryButtons();
+      updateRecButtons();
+    } else {
+      setDisabled(recUi.undo, true);
+      setDisabled(recUi.redo, true);
+    }
+  }
+
+  function playRecording(rec, fromStart) {
+    if (isRecording()) return;
+    const target = rec || playbackTarget();
+    if (!target || !Array.isArray(target.frames) || target.frames.length < 2) {
+      setMessageKey('animator.rec.noTarget', null, 'There is no recording to play yet.');
+      return;
+    }
+    if (state.replay.raf) window.cancelAnimationFrame(state.replay.raf);
+    state.replay.raf = 0;
+    stopRaf();
+    state.replay.rec = target;
+    const total = target.duration || CORE.durationOf(target.frames);
+    state.replay.time = fromStart ? 0 : Math.min(state.replay.time, total);
+    state.replay.status = 'playing';
+    state.replay.last = performance.now();
+    state.mode = 'replay';
+    stage.classList.add('is-replaying');
+    setEditorEnabled(false);
+    refreshRecordingUi();
+    refreshStatus();
+    state.replay.raf = window.requestAnimationFrame(replayTick);
+  }
+
+  function replayTick(timestamp) {
+    if (state.replay.status !== 'playing' || !state.replay.rec) {
+      state.replay.raf = 0;
+      return;
+    }
+    const rec = state.replay.rec;
+    const total = rec.duration || CORE.durationOf(rec.frames);
+    let delta = (timestamp - state.replay.last) / 1000;
+    state.replay.last = timestamp;
+    if (!Number.isFinite(delta) || delta < 0) delta = 0;
+    delta = Math.min(delta, 0.1);
+    state.replay.time = Math.min(total, state.replay.time + delta * 1000);
+    const snapshot = CORE.sampleAt(rec.frames, state.replay.time);
+    if (snapshot) {
+      state.history.suppress = true;
+      state.pose = CORE.fromSnapshot(snapshot, state.pose);
+      refreshFootData();
+      state.manual = false;
+      if (MOTION.CLIPS[snapshot.n]) state.preset = snapshot.n;
+      setActivePreset(state.preset);
+      render();
+      state.history.suppress = false;
+    }
+    refreshRecordingUi();
+    if (state.replay.time >= total) {
+      finishReplay();
+      return;
+    }
+    state.replay.raf = window.requestAnimationFrame(replayTick);
+  }
+
+  function finishReplay() {
+    state.replay.status = 'ended';
+    state.replay.raf = 0;
+    state.mode = 'replayEnded';
+    stage.classList.remove('is-replaying');
+    setEditorEnabled(true);
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function pauseReplay() {
+    if (state.replay.status !== 'playing') return;
+    if (state.replay.raf) window.cancelAnimationFrame(state.replay.raf);
+    state.replay.raf = 0;
+    state.replay.status = 'paused';
+    state.mode = 'replayPaused';
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function resumeReplay() {
+    if (state.replay.status !== 'paused') return;
+    state.replay.status = 'playing';
+    state.replay.last = performance.now();
+    state.mode = 'replay';
+    refreshRecordingUi();
+    refreshStatus();
+    state.replay.raf = window.requestAnimationFrame(replayTick);
+  }
+
+  function stopReplay() {
+    if (!isReplaying()) return;
+    if (state.replay.raf) window.cancelAnimationFrame(state.replay.raf);
+    state.replay.raf = 0;
+    state.replay.status = 'idle';
+    state.replay.time = 0;
+    stage.classList.remove('is-replaying');
+    setEditorEnabled(true);
+    state.mode = 'manual';
+    state.manual = true;
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  /* Panel UI --------------------------------------------------------- */
+
+  function updateRecButtons() {
+    const recording = state.rec.status === 'recording';
+    const paused = state.rec.status === 'paused';
+    const playing = state.replay.status === 'playing';
+    const target = Boolean(playbackTarget());
+    setDisabled(recUi.record, recording || paused || isReplaying());
+    setDisabled(recUi.pause, !recording);
+    setDisabled(recUi.resume, !paused);
+    setDisabled(recUi.stop, !(recording || paused || isReplaying()));
+    setDisabled(recUi.play, (!target && !playing) || recording || paused);
+    setDisabled(recUi.replay, (!target && !playing) || recording || paused);
+    setDisabled(recUi.save, !hasDraft() || isReplaying());
+    setDisabled(recUi.poseSave, isReplaying() || isRecording());
+    if (recUi.stop) {
+      const stopLabel = isReplaying()
+        ? tr('animator.rec.stopPlay', null, '■ Stop playback')
+        : tr('animator.rec.stop', null, '■ Stop rec.');
+      if (recUi.stop.textContent !== stopLabel) recUi.stop.textContent = stopLabel;
+    }
+    if (recUi.play) {
+      const label = playing
+        ? tr('animator.rec.pausePlay', null, '❙❙ Pause playback')
+        : state.replay.status === 'paused'
+          ? tr('animator.rec.resumePlay', null, '▶ Resume playback')
+          : tr('animator.rec.play', null, '▶ Play recording');
+      if (recUi.play.textContent !== label) recUi.play.textContent = label;
+    }
+  }
+
+  function updateRecordingTime() {
+    const source = state.replay.rec;
+    const total = source ? (source.duration || CORE.durationOf(source.frames)) : (state.rec.duration || 0);
+    let current = 0;
+    if (state.replay.status !== 'idle') current = state.replay.time;
+    else if (state.rec.status === 'recording') current = recordingTime();
+    else if (state.rec.status === 'paused' || state.rec.status === 'stopped') current = state.rec.elapsed;
+    if (recUi.time) recUi.time.textContent = CORE.formatDuration(current);
+    if (recUi.total) recUi.total.textContent = CORE.formatDuration(total);
+    if (recUi.bar) recUi.bar.style.width = `${total > 0 ? Math.min(100, (current / total) * 100) : 0}%`;
+  }
+
+  function updateCounts() {
+    if (recUi.poseCount) recUi.poseCount.textContent = String(state.poseLibrary.length);
+    if (recUi.recCount) recUi.recCount.textContent = String(state.recLibrary.length);
+  }
+
+  function refreshRecordingUi() {
+    updateRecButtons();
+    updateHistoryButtons();
+    const name = state.replay.status === 'playing' ? 'playing'
+      : state.replay.status === 'paused' ? 'playPaused'
+        : state.replay.status === 'ended' ? 'playEnded'
+          : state.rec.status;
+    if (recUi.state) {
+      recUi.state.dataset.state = name;
+      recUi.state.textContent = tr(`animator.rec.state.${name}`, null, name);
+    }
+    updateRecordingTime();
+    updateCounts();
+  }
+
+  /* Persistence ------------------------------------------------------ */
+
+  function readLocal(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch (error) {
+      state.storageAvailable = false;
+      return null;
+    }
+  }
+
+  function writeLocal(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // Unreadable data is always backed up before the list is reset, never
+  // overwritten in place.
+  function loadLibrary(key, kind) {
+    const raw = readLocal(key);
+    if (raw === null) return [];
+    const parsed = CORE.parseStore(raw, kind);
+    if (parsed.ok) {
+      if (parsed.dropped) setMessageKey('animator.store.corrupt', { key }, 'Some saved items could not be read and were skipped.');
+      return parsed.items;
+    }
+    const backupKey = `${key}-backup-${Date.now()}`;
+    if (writeLocal(backupKey, raw)) {
+      setMessageKey('animator.store.corrupt', { key: backupKey }, `Stored data could not be read. Backed up as ${backupKey}; the list was reset.`);
+    } else {
+      state.corrupt[key] = raw;
+      setMessageKey('animator.store.blocked', null, 'Could not back up the damaged data, so saving is paused to protect it.');
+    }
+    return [];
+  }
+
+  function persistLibrary(key, kind, items) {
+    if (!state.storageAvailable) return true;
+    if (state.corrupt[key]) {
+      setMessageKey('animator.store.blocked', null, 'Could not back up the damaged data, so saving is paused to protect it.', 'error');
+      return false;
+    }
+    if (writeLocal(key, CORE.serializeStore(kind, items))) return true;
+    setMessageKey('animator.store.quota', null, 'Local storage is full; this save did not apply.', 'error');
+    return false;
+  }
+
+  function loadLibraries() {
+    state.poseLibrary = loadLibrary(POSE_STORE_KEY, 'poses');
+    state.recLibrary = loadLibrary(REC_STORE_KEY, 'recordings');
+    if (!state.storageAvailable) {
+      setMessageKey('animator.store.unavailable', null, 'Local storage is unavailable; changes last for this session only.', 'error');
+    }
+    renderPoseList();
+    renderRecList();
+  }
+
+  /* Libraries -------------------------------------------------------- */
+
+  function createAction(label, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  function emptyRow(text) {
+    const row = document.createElement('li');
+    row.className = 'rec-empty';
+    row.textContent = text;
+    return row;
+  }
+
+  function itemMain(name, meta) {
+    const main = document.createElement('div');
+    main.className = 'rec-item-main';
+    const nameNode = document.createElement('span');
+    nameNode.className = 'rec-item-name';
+    nameNode.textContent = name;
+    const metaNode = document.createElement('span');
+    metaNode.className = 'rec-item-meta';
+    metaNode.textContent = meta;
+    main.append(nameNode, metaNode);
+    return main;
+  }
+
+  function actionGroup(buttons) {
+    const group = document.createElement('div');
+    group.className = 'rec-item-actions';
+    buttons.forEach((button) => group.append(button));
+    return group;
+  }
+
+  function renderPoseList() {
+    const list = recUi.poseList;
+    if (!list) return;
+    list.textContent = '';
+    if (!state.poseLibrary.length) {
+      list.append(emptyRow(tr('animator.pose.emptyList', null, 'No saved poses yet.')));
+    } else {
+      state.poseLibrary.forEach((item) => {
+        const row = document.createElement('li');
+        row.append(
+          itemMain(item.name, CORE.formatDate(item.createdAt)),
+          actionGroup([
+            createAction(tr('animator.pose.load', null, 'Load'), () => loadPose(item)),
+            createAction(tr('animator.pose.delete', null, 'Delete'), () => deletePose(item))
+          ])
+        );
+        list.append(row);
+      });
+    }
+    updateCounts();
+  }
+
+  function renderRecList() {
+    const list = recUi.recList;
+    if (!list) return;
+    list.textContent = '';
+    if (!state.recLibrary.length) {
+      list.append(emptyRow(tr('animator.rec.emptyList', null, 'No recordings yet. Finish a take and save it.')));
+      updateCounts();
+      return;
+    }
+    state.recLibrary.forEach((item) => {
+      const row = document.createElement('li');
+      if (state.editingRec === item.id) {
+        const form = document.createElement('div');
+        form.className = 'rec-rename';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 60;
+        input.value = item.name;
+        input.setAttribute('aria-label', tr('animator.rec.renameAria', null, 'Rename recording'));
+        const close = () => {
+          state.editingRec = null;
+          renderRecList();
+        };
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            renameRecording(item, input.value);
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            close();
+          }
+        });
+        form.append(
+          input,
+          createAction(tr('animator.rec.renameSave', null, 'Save'), () => renameRecording(item, input.value)),
+          createAction(tr('animator.rec.renameCancel', null, 'Cancel'), close)
+        );
+        row.append(form);
+        list.append(row);
+        input.focus();
+        input.select();
+        return;
+      }
+      const meta = tr(
+        'animator.rec.itemMeta',
+        { duration: CORE.formatDuration(item.duration), date: CORE.formatDate(item.createdAt) },
+        `${CORE.formatDuration(item.duration)} · ${CORE.formatDate(item.createdAt)}`
+      );
+      row.append(
+        itemMain(item.name, meta),
+        actionGroup([
+          createAction(tr('animator.rec.playItem', null, 'Play'), () => playRecording(item, true)),
+          createAction(tr('animator.rec.rename', null, 'Rename'), () => {
+            state.editingRec = item.id;
+            renderRecList();
+          }),
+          createAction(tr('animator.rec.delete', null, 'Delete'), () => deleteRecording(item))
+        ])
+      );
+      list.append(row);
+    });
+    updateCounts();
+  }
+
+  /* Library actions -------------------------------------------------- */
+
+  function savePose() {
+    if (isReplaying() || isRecording()) return;
+    if (state.poseLibrary.length >= POSE_LIMIT) {
+      setMessageKey('animator.pose.limitCount', { limit: POSE_LIMIT }, `Up to ${POSE_LIMIT} poses can be saved.`, 'error');
+      return;
+    }
+    const fallback = tr('animator.pose.defaultName', { n: state.poseLibrary.length + 1 }, `Pose ${state.poseLibrary.length + 1}`);
+    const typed = recUi.poseName ? recUi.poseName.value.trim() : '';
+    const name = CORE.uniqueName(typed || fallback, state.poseLibrary.map((item) => item.name));
+    const item = { id: CORE.createId('pose'), name, createdAt: Date.now(), pose: snapshotOf() };
+    state.poseLibrary.unshift(item);
+    if (!persistLibrary(POSE_STORE_KEY, 'poses', state.poseLibrary)) {
+      state.poseLibrary.shift();
+      renderPoseList();
+      return;
+    }
+    if (recUi.poseName) recUi.poseName.value = '';
+    setMessageKey('animator.pose.saved', { name }, `Pose saved as “${name}”.`);
+    renderPoseList();
+  }
+
+  function loadPose(item) {
+    if (!item || !item.pose || isReplaying() || isRecording()) return;
+    commitPending();
+    pushHistory(snapshotOf());
+    applySnapshot(item.pose);
+    setMessageKey('animator.pose.loaded', { name: item.name }, `Loaded “${item.name}”.`);
+  }
+
+  function deletePose(item) {
+    if (!item) return;
+    const index = state.poseLibrary.indexOf(item);
+    if (index < 0) return;
+    if (!window.confirm(tr('animator.pose.confirmDelete', { name: item.name }, `Delete “${item.name}”?`))) return;
+    state.poseLibrary.splice(index, 1);
+    if (!persistLibrary(POSE_STORE_KEY, 'poses', state.poseLibrary)) {
+      state.poseLibrary.splice(index, 0, item);
+    } else {
+      setMessageKey('animator.pose.deleted', { name: item.name }, `Deleted “${item.name}”.`);
+    }
+    renderPoseList();
+  }
+
+  function saveRecording() {
+    if (!hasDraft() || isReplaying()) return;
+    if (state.recLibrary.length >= REC_LIMIT) {
+      setMessageKey('animator.rec.limitCount', { limit: REC_LIMIT }, `Up to ${REC_LIMIT} recordings can be saved.`, 'error');
+      return;
+    }
+    const fallback = tr('animator.rec.defaultName', { n: state.recLibrary.length + 1 }, `Recording ${state.recLibrary.length + 1}`);
+    const typed = recUi.name ? recUi.name.value.trim() : '';
+    const name = CORE.uniqueName(typed || fallback, state.recLibrary.map((item) => item.name));
+    const item = {
+      id: CORE.createId('rec'),
+      name,
+      createdAt: Date.now(),
+      duration: state.rec.duration || CORE.durationOf(state.rec.frames),
+      frames: state.rec.frames.slice()
+    };
+    state.recLibrary.unshift(item);
+    if (!persistLibrary(REC_STORE_KEY, 'recordings', state.recLibrary)) {
+      state.recLibrary.shift();
+      return;
+    }
+    state.replay.rec = item;
+    state.replay.time = 0;
+    state.replay.status = 'idle';
+    state.rec.frames = [];
+    state.rec.status = 'idle';
+    state.rec.elapsed = 0;
+    state.rec.duration = 0;
+    if (recUi.name) recUi.name.value = '';
+    setMessageKey('animator.rec.saved', { name, duration: CORE.formatDuration(item.duration) }, `Saved “${name}”.`);
+    renderRecList();
+    refreshRecordingUi();
+    refreshStatus();
+  }
+
+  function renameRecording(item, rawName) {
+    if (!item) return;
+    const name = (rawName || '').trim();
+    if (!name) {
+      setMessageKey('animator.rec.renameEmpty', null, 'Enter a name first.', 'error');
+      return;
+    }
+    const others = state.recLibrary.filter((entry) => entry !== item).map((entry) => entry.name);
+    const finalName = CORE.uniqueName(name, others);
+    const previous = item.name;
+    item.name = finalName;
+    if (!persistLibrary(REC_STORE_KEY, 'recordings', state.recLibrary)) {
+      item.name = previous;
+      return;
+    }
+    state.editingRec = null;
+    if (state.replay.rec === item) refreshStatus();
+    setMessageKey('animator.rec.renamed', { name: finalName }, `Renamed to “${finalName}”.`);
+    renderRecList();
+  }
+
+  function deleteRecording(item) {
+    if (!item) return;
+    const index = state.recLibrary.indexOf(item);
+    if (index < 0) return;
+    if (!window.confirm(tr('animator.rec.confirmDelete', { name: item.name }, `Delete “${item.name}”?`))) return;
+    if (state.replay.rec === item) {
+      stopReplay();
+      state.replay.rec = null;
+      state.replay.time = 0;
+    }
+    state.recLibrary.splice(index, 1);
+    if (!persistLibrary(REC_STORE_KEY, 'recordings', state.recLibrary)) {
+      state.recLibrary.splice(index, 0, item);
+    } else {
+      setMessageKey('animator.rec.deleted', { name: item.name }, `Deleted “${item.name}”.`);
+    }
+    renderRecList();
+    refreshRecordingUi();
+    refreshStatus();
   }
 
   parts.forEach((part) => {
@@ -1037,6 +1836,7 @@
   });
   presetButtons.forEach((button) => {
     button.addEventListener('click', () => {
+      if (isReplaying()) return;
       setActivePreset(button.dataset.preset);
       startPlayback(button.dataset.preset, { fromStart: true });
     });
@@ -1044,18 +1844,67 @@
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('blur', endDrag);
 
+  document.addEventListener('keydown', (event) => {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+    const key = String(event.key || '').toLowerCase();
+    if (key !== 'z' && key !== 'y') return;
+    const target = event.target;
+    const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || (target && target.isContentEditable)) return;
+    event.preventDefault();
+    if (key === 'y' || event.shiftKey) redoPose();
+    else undoPose();
+  });
+
+  recUi.record?.addEventListener('click', startRecording);
+  recUi.pause?.addEventListener('click', pauseRecording);
+  recUi.resume?.addEventListener('click', resumeRecording);
+  recUi.stop?.addEventListener('click', () => {
+    // The stop key doubles as an abort for playback so a paused take can be left.
+    if (isReplaying()) stopReplay();
+    else stopRecording();
+  });
+  recUi.play?.addEventListener('click', () => {
+    if (state.replay.status === 'playing') pauseReplay();
+    else if (state.replay.status === 'paused') resumeReplay();
+    else playRecording(playbackTarget(), true);
+  });
+  recUi.replay?.addEventListener('click', () => playRecording(playbackTarget(), true));
+  recUi.save?.addEventListener('click', saveRecording);
+  recUi.poseSave?.addEventListener('click', savePose);
+  recUi.undo?.addEventListener('click', undoPose);
+  recUi.redo?.addEventListener('click', redoPose);
+  recUi.poseName?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      savePose();
+    }
+  });
+  recUi.name?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !isRecording()) {
+      event.preventDefault();
+      saveRecording();
+    }
+  });
+
   setActivePreset('stand');
   state.pose = MOTION.samplePose('stand', 0);
+  state.initial = snapshotOf();
   selectPart('torso');
   render();
   refreshStatus();
   refreshPartLabels();
   refreshExportStatus();
+  loadLibraries();
+  refreshRecordingUi();
 
   document.addEventListener('languagechange', () => {
     syncControls();
     refreshStatus();
     refreshPartLabels();
     refreshExportStatus();
+    refreshRecordingUi();
+    renderPoseList();
+    renderRecList();
   });
 })();

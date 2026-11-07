@@ -32,7 +32,7 @@
         <div class="animator-topbar">
           <div><span class="studio-dot"></span><span id="animator-status" aria-live="polite">Ready · select a segment</span></div>
           <label class="inline-angle" for="inline-angle"><span id="inline-selected">Torso</span><input id="inline-angle" type="range" min="-180" max="180" value="0"><output id="inline-angle-value">0°</output></label>
-          <button id="animator-reset" class="editor-button" type="button" data-i18n="animator.reset">Reset pose</button>
+          <button id="animator-reset" class="editor-button" type="button" data-i18n="animator.resetInitial">Reset to initial pose</button>
         </div>
         <div id="animator-stage" class="animator-stage animator-stage-v2">
           <div class="stage-grid-lines" aria-hidden="true"></div>
@@ -140,14 +140,68 @@
           <p data-i18n="animator.partsHint">Segments stay attached at the elbow, knee, shoulder, and hip. A parent segment carries its connected child.</p>
         </section>
         <section class="inspector-card">
+          <div class="history-controls" role="group" aria-label="Undo and redo" data-i18n-aria-label="animator.edit.historyAria">
+            <button id="animator-undo" class="editor-button editor-button-icon" type="button" disabled title="Undo the last pose change" data-i18n="animator.edit.undo" data-i18n-title="animator.edit.undoHint">↶ Undo</button>
+            <button id="animator-redo" class="editor-button editor-button-icon" type="button" disabled title="Redo the undone pose change" data-i18n="animator.edit.redo" data-i18n-title="animator.edit.redoHint">↷ Redo</button>
+          </div>
           <button id="animator-export" class="editor-button editor-button-primary editor-button-wide" type="button" data-i18n="animator.export">Export pose JSON</button>
           <p id="export-status" class="export-status" aria-live="polite">Connected skeleton data · v5</p>
         </section>
       </aside>
     </section>
+    <section class="recording-panel" aria-labelledby="recording-title">
+      <header class="recording-heading">
+        <p class="eyebrow" data-i18n="animator.rec.eyebrow">Live recording</p>
+        <h2 id="recording-title" data-i18n="animator.rec.title">Record your movement</h2>
+        <p data-i18n="animator.rec.lede">Press record, then drag joints or play a preset as usual. The rig is sampled at about 30 frames per second; adjustments made while paused are not recorded.</p>
+      </header>
+      <div class="rec-transport" role="group" aria-label="Recording and playback controls" data-i18n-aria-label="animator.rec.transportAria">
+        <div class="rec-readout">
+          <span id="rec-state" class="rec-state" data-state="idle">Idle</span>
+          <span id="rec-time" class="rec-time">0:00.0</span>
+          <span class="rec-time-sep" aria-hidden="true">/</span>
+          <span id="rec-total" class="rec-time">0:00.0</span>
+        </div>
+        <div class="rec-bar" aria-hidden="true"><span id="rec-bar-fill" class="rec-bar-fill"></span></div>
+        <div class="rec-buttons">
+          <button id="rec-record" class="editor-button editor-button-primary" type="button" data-i18n="animator.rec.record">● Record</button>
+          <button id="rec-pause" class="editor-button" type="button" disabled data-i18n="animator.rec.pauseRecord">❙❙ Pause rec.</button>
+          <button id="rec-resume" class="editor-button" type="button" disabled data-i18n="animator.rec.resumeRecord">▶ Resume rec.</button>
+          <button id="rec-stop" class="editor-button" type="button" disabled data-i18n="animator.rec.stop">■ Stop rec.</button>
+          <button id="rec-play" class="editor-button" type="button" disabled data-i18n="animator.rec.play">▶ Play recording</button>
+          <button id="rec-replay" class="editor-button" type="button" disabled data-i18n="animator.rec.replay">↺ Replay</button>
+          <button id="rec-save" class="editor-button" type="button" disabled data-i18n="animator.rec.save">Save recording</button>
+        </div>
+        <p id="rec-message" class="rec-message" role="status" aria-live="polite"></p>
+        <label class="rec-name" for="rec-name"><span data-i18n="animator.rec.nameLabel">Recording name</span>
+          <input id="rec-name" type="text" maxlength="60" placeholder="e.g. Wave hello" data-i18n-placeholder="animator.rec.namePlaceholder">
+        </label>
+      </div>
+      <div class="rec-libraries">
+        <section class="rec-library" aria-labelledby="pose-library-title">
+          <div class="rec-library-head">
+            <h3 id="pose-library-title" data-i18n="animator.pose.library">Saved poses</h3>
+            <span id="pose-count" class="rec-count">0</span>
+          </div>
+          <label class="rec-name" for="pose-name"><span data-i18n="animator.pose.nameLabel">Pose name</span>
+            <input id="pose-name" type="text" maxlength="60" placeholder="e.g. Left arm up" data-i18n-placeholder="animator.pose.namePlaceholder">
+          </label>
+          <button id="pose-save" class="editor-button editor-button-wide" type="button" data-i18n="animator.pose.save">Save current pose</button>
+          <ul id="pose-list" class="rec-list" aria-label="Saved poses" data-i18n-aria-label="animator.pose.libraryAria"></ul>
+        </section>
+        <section class="rec-library" aria-labelledby="rec-library-title">
+          <div class="rec-library-head">
+            <h3 id="rec-library-title" data-i18n="animator.rec.library">Recordings</h3>
+            <span id="rec-count" class="rec-count">0</span>
+          </div>
+          <ul id="rec-list" class="rec-list" aria-label="Saved recordings" data-i18n-aria-label="animator.rec.libraryAria"></ul>
+        </section>
+      </div>
+    </section>
   </main>
   <footer class="site-footer page-shell"><p data-i18n="common.footer.animator">Small shapes, serious rhythm.</p><p data-i18n="common.copyright">© 2026 Stickman Motion Simulator</p></footer>
   <script src="script.js"></script>
+  <script src="animator-recording-core.js"></script>
   <script src="animator.js"></script>
 </body>
 </html>

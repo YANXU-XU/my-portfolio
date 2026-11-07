@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Stickman Motion Simulator — Live Demo Script (中文 / English)</title>
+<style>
+  @page { size: A4; margin: 15mm 14mm 14mm; }
+  :root{
+    --ink:#171a1f; --body:#2b3138; --muted:#5c6675; --line:#dde2e9;
+    --accent:#b8451f; --accent-soft:#fdf1ea; --tag:#0f5c4f; --tag-soft:#e9f4f1;
+  }
+  *{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    color:var(--body); font-size:10.2pt; line-height:1.52;
+  }
+  code{ font-family:"Consolas","Cascadia Mono",monospace; font-size:.94em; background:#f1f3f6; padding:0 .6mm; border-radius:1pt; }
+  .wrap{ max-width:190mm; margin:0 auto; }
+  .cover{ border-bottom:2.5pt solid var(--accent); padding-bottom:6mm; margin-bottom:6mm; }
+  .kicker{ font-size:8.4pt; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 2.5mm; }
+  h1{ font-size:21pt; line-height:1.22; margin:0 0 1.5mm; color:var(--ink); letter-spacing:-.01em; }
+  h1 .sub{ display:block; font-size:12.5pt; font-weight:600; color:var(--muted); margin-top:1.5mm; letter-spacing:0; }
+  .meta{ display:flex; flex-wrap:wrap; gap:2mm; margin-top:4mm; }
+  .chip{ border:0.6pt solid var(--line); border-radius:999px; padding:1mm 3mm; font-size:8.6pt; color:var(--muted); background:#fbfcfd; }
+  .chip b{ color:var(--ink); font-weight:600; }
+  section{ margin:0 0 6mm; }
+  h2{
+    font-size:12.6pt; margin:0 0 2.5mm; padding-left:3mm; border-left:3pt solid var(--accent);
+    color:var(--ink); line-height:1.3; break-after:avoid; page-break-after:avoid;
+  }
+  h2 .en{ display:block; font-size:9.2pt; font-weight:600; color:var(--muted); margin-top:.6mm; letter-spacing:.01em; }
+  h2 .time{ font-size:8.6pt; font-weight:600; color:var(--accent); letter-spacing:.02em; }
+  h3{ font-size:10.6pt; margin:5mm 0 2mm; color:var(--ink); break-after:avoid; page-break-after:avoid; }
+  h3 .en{ color:var(--muted); font-weight:600; font-size:9pt; }
+  .cue{
+    margin:0 0 2.4mm; padding:1.8mm 3mm; border-radius:2pt; background:var(--tag-soft);
+    border-left:2.5pt solid var(--tag); font-size:9.3pt; color:#123f37;
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .cue .tag{ font-weight:800; font-size:8.2pt; letter-spacing:.08em; text-transform:uppercase; color:var(--tag); margin-right:2mm; }
+  .cue .en{ display:block; color:#3f5c56; font-size:8.8pt; margin-top:.8mm; }
+  .block{ margin:0 0 3.2mm; padding-left:3.2mm; border-left:1.4pt solid var(--line); break-inside:avoid; page-break-inside:avoid; }
+  .block p{ margin:0; }
+  .zh{ color:var(--body); }
+  .en{ color:var(--muted); font-size:9.1pt; margin-top:1.2mm !important; line-height:1.45; }
+  .beat{ margin:2mm 0; text-align:center; font-size:8.8pt; color:var(--accent); font-style:italic; }
+  strong{ color:var(--ink); }
+  em{ font-style:normal; background:linear-gradient(transparent 62%, #ffe9c9 62%); padding:0 .4mm; }
+  ul.clean{ margin:0 0 3mm; padding-left:4.6mm; }
+  ul.clean li{ margin:0 0 1.4mm; }
+  ul.clean li .en{ display:block; }
+  .check li{ list-style:none; position:relative; padding-left:5mm; }
+  .check li::before{ content:""; position:absolute; left:0; top:1.1mm; width:2.6mm; height:2.6mm; border:0.7pt solid var(--muted); border-radius:.6pt; }
+  table{ width:100%; border-collapse:collapse; margin:0 0 3mm; font-size:9.1pt; }
+  th,td{ border-bottom:0.6pt solid var(--line); padding:1.7mm 2mm; vertical-align:top; text-align:left; }
+  th{ background:#f5f7f9; font-size:8.7pt; color:var(--ink); font-weight:700; }
+  td .en{ font-size:8.6pt; }
+  tr{ break-inside:avoid; page-break-inside:avoid; }
+  .cheat{
+    border:0.8pt solid var(--line); border-radius:3pt; background:#fcfdfe; padding:4mm;
+    font-family:"Consolas","Cascadia Mono",monospace; font-size:8.9pt; line-height:1.62;
+    white-space:pre-wrap; break-inside:avoid; page-break-inside:avoid;
+  }
+  .note{
+    margin-top:4mm; padding:2.5mm 3mm; background:var(--accent-soft);
+    border-left:2.5pt solid var(--accent); font-size:8.8pt; color:#6b2c11; border-radius:2pt;
+  }
+  .page-break{ break-before:page; page-break-before:always; }
+  .foot{
+    margin-top:5mm; padding-top:2.5mm; border-top:0.6pt solid var(--line);
+    font-size:8.2pt; color:var(--muted); display:flex; justify-content:space-between; gap:4mm;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="cover">
+    <p class="kicker">Live Demo Script · 边操作边讲解</p>
+    <h1>一个可以拆开的火柴人
+      <span class="sub">A Stickman You Can Take Apart — Stickman Motion Simulator</span>
+    </h1>
+    <div class="meta">
+      <span class="chip"><b>约 8 分钟</b> · About 8 min</span>
+      <span class="chip"><b>中英对照</b> · Bilingual</span>
+      <span class="chip">重点：<b>动画编辑器</b> · Focus: the Animator</span>
+      <span class="chip">另附 <b>3 分钟精简版</b> · 3-min cut</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>0 · 上台前 60 秒检查清单 <span class="time">60 s</span>
+      <span class="en">Pre-flight checklist</span>
+    </h2>
+    <ul class="clean check">
+      <li>打开 <code>index.html</code>，语言确认在<b>中文</b>。
+        <span class="en">Open <code>index.html</code>; make sure the language is Chinese (top-right switch).</span></li>
+      <li>浏览器缩放 <b>110%</b>；投屏确认右侧检查器面板没被裁掉。
+        <span class="en">Zoom to 110%; make sure the right-hand inspector panel isn't cropped on the projector.</span></li>
+      <li>提前录一条 3 秒的备用片段，命名 <b>backup</b>，不要删。
+        <span class="en">Record a 3-second backup take named <b>backup</b> — and don't delete it.</span></li>
+      <li>记住：<code>Ctrl+Z</code> 撤销、<code>Ctrl+Y</code> 重做；游戏里用数字键 <code>1</code>–<code>7</code>。
+        <span class="en">Keys: <code>Ctrl+Z</code> undo, <code>Ctrl+Y</code> redo; number keys <code>1</code>–<code>7</code> in the game.</span></li>
+      <li>画廊有声音开关：先确认音响，或保持关闭并在口头上说明。
+        <span class="en">The gallery has a sound toggle — confirm the speakers, or leave it off and say so.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>1 · 开场 <span class="time">约 40 秒</span>
+      <span class="en">Opening</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>停在首页，先不说话，让自动巡演跑两个动作。
+      <span class="en">Stay on the homepage. Say nothing for a moment; let the auto-tour play two motions.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"大家好。开始之前我想先问一个问题：如果要你用语言描述'走路'，你会怎么说？</p>
+      <p class="en">"Hi everyone. Before I start, one question: if you had to describe 'walking' in words, what would you say?</p>
+    </div>
+    <p class="beat">（停顿两秒，等观众反应 · pause two seconds, let the room answer）</p>
+    <div class="block">
+      <p class="zh">大概就是'两条腿交替往前'，一句话就说完了。可如果真要让一个火柴人走起来，需要的是一连串非常具体的数字：髋在哪儿、大腿转多少度、小腿什么时候弯、脚掌什么时候落地。</p>
+      <p class="en">Probably 'the legs move forward alternately' — one sentence and you're done. But to actually make a stickman walk, you need a long list of very specific numbers: where the hip sits, how many degrees the thigh turns, when the knee bends, when the foot lands.</p>
+    </div>
+    <div class="block">
+      <p class="zh">所以我会说：<strong>动作是这个世界上最难说清楚、也最容易被看错的东西。</strong></p>
+      <p class="en">So I'd say: <strong>motion is one of the hardest things in the world to put into words — and one of the easiest to misread.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">我做的这个网站，就是想把它变得可以说清楚——一个能把动作拆开看、拆开改、再存下来的地方。</p>
+      <p class="en">This site is my attempt to make it speakable: a place where a movement can be taken apart, changed, and kept.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · 一句话介绍 + 全站结构 <span class="time">约 30 秒</span>
+      <span class="en">One-line pitch &amp; site structure</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>鼠标沿顶部导航从左到右划过去，<b>不要点</b>。
+      <span class="en">Sweep the mouse along the top navigation, left to right. Don't click.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"它叫 <strong>Stickman Motion Simulator</strong>，火柴人动作模拟器。一共五页：首页、动作游戏、动作画廊、动画编辑器、关于。</p>
+      <p class="en">"It's called <strong>Stickman Motion Simulator</strong>. Five pages: Home, Simulator, Gallery, Animator, About.</p>
+    </div>
+    <div class="block">
+      <p class="zh">结构不是五个并列的页面，而是<strong>三层递进</strong>：</p>
+      <p class="en">These aren't five parallel pages — they're <strong>three steps</strong>:</p>
+      <ul class="clean">
+        <li><strong>看</strong>——首页和画廊，先认识七个动作。
+          <span class="en"><strong>See</strong> — Home and Gallery: meet the seven motions.</span></li>
+        <li><strong>玩</strong>——动作游戏，逼你把这七个动作记住。
+          <span class="en"><strong>Play</strong> — the Simulator: it forces you to remember them.</span></li>
+        <li><strong>做</strong>——动画编辑器，让你自己造一个动作出来。
+          <span class="en"><strong>Make</strong> — the Animator: it lets you build one yourself.</span></li>
+      </ul>
+      <p class="zh">今天重点在最后两层，尤其是'做'这一层。</p>
+      <p class="en">Today I'll focus on the last two — especially 'Make'.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · 第一层：七个动作，就是一套词汇 <span class="time">约 50 秒</span>
+      <span class="en">Layer one — seven motions are a vocabulary</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>进「动作画廊」，点「走路」卡片的 <b>播放动作</b>，再点「挥手」。
+      <span class="en">Open the Gallery; press <b>Play motion</b> on the walk card, then on the wave card.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"先看画廊。七个动作：站、走、跑、跳、挥手、蹲、游泳。</p>
+      <p class="en">"Start with the Gallery. Seven motions: stand, walk, run, jump, wave, squat, swim.</p>
+    </div>
+    <div class="block">
+      <p class="zh">它们全部只用圆、矩形、圆角粗线拼出来，颜色也只有固定的八种。每个动作有自己的节奏和声音——（点播放）点'播放动作'就能看到。</p>
+      <p class="en">They're built from nothing but circles, rectangles and rounded thick lines, with a fixed palette of eight colors. Each one has its own rhythm and sound — (play) press 'Play motion' and you'll see.</p>
+    </div>
+    <div class="block">
+      <p class="zh">我特意让它们的画法完全一致。因为接下来你会发现：<strong>这七个动作不是插图，是这个网站的词汇表。</strong>记住了它们，游戏才玩得下去，编辑器才有东西可改。</p>
+      <p class="en">I deliberately drew them the same way. Because you'll notice: <strong>these seven aren't illustrations — they're the site's vocabulary.</strong> Know them, and the game works; and the editor has something to change.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · 第二层：动作游戏，让用户"记住" <span class="time">约 70 秒</span>
+      <span class="en">Layer two — the game that makes you remember</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>进「动作游戏」，点 <b>Start game</b>，双手离开键盘，让观众先看它演。
+      <span class="en">Open the Simulator, press <b>Start game</b>, keep your hands off the keys and let the room watch.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"第二层，动作游戏，里面这个模式叫 <strong>Echo</strong>——回声。</p>
+      <p class="en">"Layer two: the Simulator, and inside it a mode called <strong>Echo</strong>.</p>
+    </div>
+    <div class="block">
+      <p class="zh">规则很简单：它先演一段动作序列，然后你要用数字键 1 到 7，按同样的顺序复现一遍。第一轮 3 个动作，之后每过一轮多一个，最长 7 个，一共五轮。三条命，错三次结束。</p>
+      <p class="en">The rule is simple: it performs a sequence, and you reproduce it with number keys 1 to 7. Round one has three motions, then one more each round, up to seven — five rounds in all. Three lives; three misses and it's over.</p>
+    </div>
+    <p class="cue"><span class="tag">Action</span>演完后按对前两个，第三个<b>故意按错</b>。
+      <span class="en">When playback ends, enter the first two correctly — then miss the third <b>on purpose</b>.</span>
+    </p>
+    <div class="block">
+      <p class="zh">（边按边说）1 是站，2 是走，3 是跑……</p>
+      <p class="en">(pressing as you speak) 1 is stand, 2 is walk, 3 is run…</p>
+    </div>
+    <p class="beat">（故意按错，停半秒让观众看到反馈 · miss on purpose, hold half a second so the room sees the feedback）</p>
+    <div class="block">
+      <p class="zh">我故意错一个。注意它没有只扣分——它会把正确答案重演一遍，同时把每一格进度标出来。</p>
+      <p class="en">I missed one on purpose. Notice it doesn't just take a life — it replays the correct answer and marks the progress of every step.</p>
+    </div>
+    <p class="cue"><span class="tag">Action</span>指一下进度条和分数。
+      <span class="en">Point at the progress strip and the score.</span>
+    </p>
+    <div class="block">
+      <p class="zh">这里是我做这个游戏真正想达到的效果：<strong>玩家在不知不觉中，把七个动作和七个编号绑在一起了。</strong></p>
+      <p class="en">This is what I actually wanted from the game: <strong>players bind seven motions to seven numbers without noticing.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">所以他才不会在下一步、面对一台'机器'的时候，完全不知道从哪开始。</p>
+      <p class="en">So that in the next step, standing in front of a machine, they aren't completely lost.</p>
+    </div>
+    <div class="block">
+      <p class="zh">这是第二层：先让人<strong>认识</strong>动作。接下来是今天的正题。</p>
+      <p class="en">That's layer two: learn to <strong>recognize</strong> motion. Now the main event.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>5 · 第三层：动画编辑器，从"复现"到"创作" <span class="time">约 3 分 30 秒 · 全程重点</span>
+      <span class="en">Layer three — the Animator: from reproducing to creating</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>进「动画编辑器」。停两秒，让观众看清骨架。
+      <span class="en">Open the Animator. Pause for two seconds and let the room look at the skeleton.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"同样七个动作，换一个方向：从'复现它'变成'造一个'。</p>
+      <p class="en">"Same seven motions, opposite direction: from 'reproduce it' to 'make one'.</p>
+    </div>
+    <div class="block">
+      <p class="zh">左边这副火柴人，不是一张图片，是一副<strong>真的骨架</strong>。我接下来会拆四件事给大家看：它怎么连、脚怎么落地、动起来靠什么、以及怎么变成作品。</p>
+      <p class="en">This stickman on the left isn't a picture — it's a <strong>real skeleton</strong>. I'll take apart four things: how it's connected, how the foot lands, what makes it move, and how it becomes a piece of work.</p>
+    </div>
+
+    <h3>5.1 · 它是关节，不是图片 <span class="time">约 35 秒</span> — <span class="en">It's joints, not a picture</span></h3>
+    <p class="cue"><span class="tag">Action</span>先点右上臂，直接拖动；再选躯干，拖一下，让头、肩、手臂一起动。
+      <span class="en">Click the right upper arm and drag; then select the torso and rotate it so head, shoulders and arms follow.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"一共十段可以选：头、躯干、两条上臂、两条前臂、两条大腿、两条小腿。每一段都挂在一个关节上，所以动一段，它的'孩子'会跟着走。</p>
+      <p class="en">"Ten selectable segments: head, torso, two upper arms, two forearms, two thighs, two shins. Each hangs on a joint, so when one moves, its children follow.</p>
+    </div>
+    <div class="block">
+      <p class="zh">（拖躯干）我转躯干，头、肩膀、两条手臂全都跟上了——这就是<strong>层级</strong>，和动画软件里的父子关系是一回事，只不过这里是手写出来的。</p>
+      <p class="en">(rotating the torso) I turn the torso, and the head, both shoulders and both arms come with it — that's <strong>hierarchy</strong>, the same parent-child idea as animation software, except this one is hand-written.</p>
+    </div>
+    <div class="block">
+      <p class="zh">另外每一段都有自己的活动范围：躯干只允许 -25 到 40 度，前臂不能反折，小腿不能往前踢。因为真实的关节就长这样，全部放开反而假。</p>
+      <p class="en">Each segment also has its own range: the torso only allows -25 to 40 degrees, the forearm can't hyperextend, the shin can't kick forward. Real joints work that way; removing the limits actually looks worse.</p>
+    </div>
+
+    <h3>5.2 · 脚会自己落地 <span class="time">约 40 秒</span> — <span class="en">The foot lands by itself</span></h3>
+    <p class="cue"><span class="tag">Action</span>选一条大腿，把它抬起来，让观众盯着脚和地面阴影。
+      <span class="en">Select a thigh and lift it; get the room to watch the foot and its ground shadow.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"第二件事，请看脚下。（抬腿）我把腿抬起来——脚掌还是水平的，地上的影子变淡、变窄了。</p>
+      <p class="en">"Second, look at the foot. (lifting the leg) I lift the leg — the foot stays level, and its shadow on the ground fades and narrows.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>这个脚不是我一张张画出来的，是算出来的。</strong>我知道髋在哪、大腿 80、小腿 74，剩下就是一个三角形求解——我做的是'两骨 IK'：目标点在地面，膝盖朝前弯。</p>
+      <p class="en"><strong>That foot isn't drawn frame by frame — it's solved.</strong> I know where the hip is, the thigh is 80, the shin is 74 — the rest is a triangle. It's a two-bone IK solve: the target is the ground, the knee bends forward.</p>
+    </div>
+    <div class="block">
+      <p class="zh">为什么非做不可？因为如果只按角度转，脚会浮在空中、或者插进地里，一眼就假。让脚自己去找地面，整套动作立刻就有了重量。</p>
+      <p class="en">Why bother? Because if you only rotate by angle, the foot floats in the air or sinks into the ground, and it reads as fake instantly. Let the foot find the ground, and the whole motion suddenly has weight.</p>
+    </div>
+
+    <h3>5.3 · 预设是时间轴，不是动图 <span class="time">约 35 秒</span> — <span class="en">Presets are timelines, not GIFs</span></h3>
+    <p class="cue"><span class="tag">Action</span>点预设 <b>Run</b>，播放中把速度切到 <b>Fast</b>，再点 <b>Jump</b>。
+      <span class="en">Pick the <b>Run</b> preset, switch speed to <b>Fast</b> while it plays, then pick <b>Jump</b>.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"如果每个姿势都靠手拖，太慢了。所以给了六个预设：站、走、跑、跳、游泳、蹲。</p>
+      <p class="en">"Doing every pose by hand would be too slow, so there are six presets: stand, walk, run, jump, swim, squat.</p>
+    </div>
+    <div class="block">
+      <p class="zh">关键在于：<strong>这些预设不是循环播放的动图，是关键帧。</strong>跑是 0.7 秒一个循环，走是 1 秒，跳是 1.8 秒而且只播一次。</p>
+      <p class="en">The key point: <strong>these aren't looping GIFs — they're keyframes.</strong> A run cycle is 0.7 s, a walk is 1 s, and a jump is 1.8 s and plays once.</p>
+    </div>
+    <div class="block">
+      <p class="zh">因为每一帧都是现场算出来的，所以速度可以随便改——（切到 Fast）从慢到快，动作是重新计算的，不是把视频快进。</p>
+      <p class="en">Because every frame is computed live, speed can change freely — (switch to Fast) slow to fast, recomputed, not fast-forwarded.</p>
+    </div>
+
+    <h3>5.4 · 撤销栈是一条线 <span class="time">约 30 秒</span> — <span class="en">Undo is one clean line</span></h3>
+    <p class="cue"><span class="tag">Action</span>故意连续拖两下，<code>Ctrl+Z</code> 两次，再 <code>Ctrl+Y</code>。
+      <span class="en">Drag twice on purpose, press <code>Ctrl+Z</code> twice, then <code>Ctrl+Y</code>.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"手摆姿势一定会手滑。<code>Ctrl+Z</code> 撤销，<code>Ctrl+Y</code> 重做，历史上限 60 步。</p>
+      <p class="en">"Hand-posing always ends in a slip. <code>Ctrl+Z</code> to undo, <code>Ctrl+Y</code> to redo, sixty steps of history.</p>
+    </div>
+    <div class="block">
+      <p class="zh">这里有个真实的坑，我待会儿会讲：拖动一次会产生几百个中间状态，如果每个都进历史，撤销就变成'一格一格往回退'。所以我把 600 毫秒内的连续拖动<strong>合并成一步</strong>。</p>
+      <p class="en">There's a real trap here, which I'll come back to: one drag produces hundreds of intermediate states. If each one entered the history, undo would step back pixel by pixel. So continuous dragging within 600 ms is <strong>merged into one step</strong>.</p>
+    </div>
+
+    <h3>5.5 · 从摆姿势到有作品 <span class="time">约 60 秒 · 全篇高潮</span> — <span class="en">From posing to a finished take</span></h3>
+    <p class="cue"><span class="tag">Action</span>按顺序：<b>● Record</b> → 拖两个关节 → <b>Pause rec.</b> → 再动一下 → <b>Resume rec.</b> → 再拖一个 → <b>Stop rec.</b> → <b>Play recording</b> → 输入名字 → <b>Save recording</b> → <b>刷新页面</b>。
+      <span class="en">Sequence: <b>Record</b> → drag two joints → <b>Pause</b> → drag again → <b>Resume</b> → drag once more → <b>Stop</b> → <b>Play recording</b> → type a name → <b>Save recording</b> → <b>refresh the page</b>.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"最后是我最想给大家看的一步：<strong>录下来。</strong></p>
+      <p class="en">"And here's the step I most want to show you: <strong>recording it.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">（点 Record）现在开始录制。我随便摆两个姿势……（拖两下）</p>
+      <p class="en">(Record) Recording now. I'll make a couple of poses… (drag twice)</p>
+    </div>
+    <div class="block">
+      <p class="zh">好，我先暂停。注意——<strong>暂停的时候我怎么改，都不会进录像</strong>，这是故意的，方便你停下来想一想。（拖一下，再 Resume）</p>
+      <p class="en">Now I'll pause. Note that <strong>anything I change while paused does not go into the take</strong> — that's deliberate, so you can stop and think. (drag once, then Resume)</p>
+    </div>
+    <div class="block">
+      <p class="zh">继续。（再拖一下）停。</p>
+      <p class="en">Continue. (drag once more) Stop.</p>
+    </div>
+    <div class="block">
+      <p class="zh">它现在告诉我：可以播放，也可以保存。（点播放）它按刚才的时间顺序重演了一遍，连我中间停顿的那一段都在里面。</p>
+      <p class="en">It now offers two things: play it back, or save it. (play) It replays in the order I made it — including the pause in the middle.</p>
+    </div>
+    <div class="block">
+      <p class="zh">（输入名字 <code>Wave hello</code>，保存；然后刷新页面，指向列表）刷新之后，它还在。因为这条录像存在<strong>浏览器的本地存储</strong>里。没有服务器，也不用登录；换一台电脑就没有了——这是我刻意的取舍，这个网站不收集任何人的数据。</p>
+      <p class="en">(Type <code>Wave hello</code>, save; then refresh and point at the list) After a refresh it's still there — because the take lives in <strong>the browser's local storage</strong>. No server, no login; change computer and it's gone. That's a deliberate trade-off: this site collects nobody's data.</p>
+    </div>
+    <div class="block">
+      <p class="zh">旁边那个'姿势库'是同一套机制：单个姿势最多存 50 条，录像最多 40 条，每条最长 60 秒。</p>
+      <p class="en">The pose library beside it works the same way: up to 50 single poses, 40 takes, each up to 60 seconds.</p>
+    </div>
+    <p class="cue"><span class="tag">Optional</span>时间富余时：点「导出」，说明下载的是 JSON。
+      <span class="en">If time allows: press Export and explain that it downloads JSON.</span>
+    </p>
+    <div class="block">
+      <p class="zh">另外它还能把当前姿势导出成 JSON，里面就是每一段的角度。不是我自己玩的格式，是可以直接喂给别的动画程序的。</p>
+      <p class="en">It can also export the current pose as JSON — an angle per segment. Not a format I invented for myself; you can feed it to other animation tools.</p>
+    </div>
+
+    <h3>5.6 · 容易被忽略的设计：回放时编辑器是锁的 <span class="time">约 20 秒</span> — <span class="en">Playback locks the editor</span></h3>
+    <p class="cue"><span class="tag">Action</span>播放一条录像，指着一片灰掉的按钮。
+      <span class="en">Play a take and point at the row of greyed-out controls.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"看，播放的时候，预设、滑杆、撤销、保存，全都灰了。</p>
+      <p class="en">"Watch this: while a take plays, the presets, sliders, undo and save all go grey.</p>
+    </div>
+    <div class="block">
+      <p class="zh">这不是没做完，是<strong>故意锁的</strong>。因为回放本身在不停地写姿态，如果这时候用户还能拖，两套逻辑就会抢同一个状态，画面会抖得像坏了。所以回放期间，编辑器只读。</p>
+      <p class="en">That isn't unfinished — it's <strong>deliberate</strong>. Playback is writing poses every frame; if the user could drag at the same time, two systems would fight over one state and the picture would jitter like it's broken. So during playback, the editor is read-only.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>6 · 制作路程：四步，每一步都被上一步的问题逼出来 <span class="time">约 1 分 20 秒</span>
+      <span class="en">How it was made — four steps, each forced by the last</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>停在编辑器，或退回首页，边讲边随手拖一下骨架（手里有动作，说话更自然）。
+      <span class="en">Stay in the Animator (or go back to Home) and keep a hand moving on the skeleton while you talk.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"最后说说它是怎么做出来的。整个过程大概四步，不是我一开始就想好的，<strong>每一步都是被上一步的问题逼出来的</strong>。</p>
+      <p class="en">"Finally, how it was built. About four steps — and I didn't plan them; <strong>each one was forced by a problem in the previous one</strong>.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>第一步，我本来只想画七个动作。</strong>最早是纯 SVG，手写坐标，让七个小人动起来。做完就发现：我只会'播放'，不会'修改'。这就是第一个念头——如果用户想改呢？</p>
+      <p class="en"><strong>Step one: I only wanted to draw seven motions.</strong> It began as pure SVG, with hand-written coordinates, seven little figures moving. Then I noticed: I could play, but I couldn't change anything. That was the first thought — what if the user wants to change it?</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>第二步，把它改成骨架。</strong>所有部位从'写死的坐标'变成'关节 + 角度'的数据。这一步是整个项目的分水岭：<strong>动作从图形变成了数据</strong>，而数据可以被计算、被撤销、被保存。后面所有功能，都是靠这一步才成立的。</p>
+      <p class="en"><strong>Step two: turn it into a skeleton.</strong> Every part went from hard-coded coordinates to joint + angle data. That's the watershed of this project: <strong>motion stopped being a picture and became data</strong> — and data can be computed, undone and stored. Everything after it depends on this one change.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>第三步，加游戏和编辑器。</strong>游戏解决'不知道怎么开始'，编辑器解决'只能看不能改'。它们看起来是两个东西，其实共用同一份动作数据。</p>
+      <p class="en"><strong>Step three: add the game and the editor.</strong> The game solves 'I don't know how to start'; the editor solves 'I can only watch'. They look like two products, but they share the same motion data.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>第四步，磨到能给别人用。</strong>这一步花的时间比前三步加起来还多：中英文两套文案三百多条，我写脚本检查有没有漏翻、有没有空字符串；键盘能选中部位、状态变化会播报给读屏软件；系统开了'减少动态效果'就关掉动画；本地数据读不出来的时候<strong>先改名备份、再重置</strong>，绝不当场覆盖。</p>
+      <p class="en"><strong>Step four: polish it until someone else can use it.</strong> This took longer than the first three steps combined: 300+ strings in Chinese and English, with a script that checks for missing or empty translations; the keyboard can select segments, and state changes are announced to screen readers; reduced-motion settings stop the animation; and when saved data can't be read, it is renamed and backed up before a reset — never overwritten in place.</p>
+    </div>
+    <p class="cue"><span class="tag">Pick 1–2</span>三个真实的坑，按剩余时间挑一到两个讲。
+      <span class="en">Three real pitfalls — tell one or two depending on time.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"讲三个我印象最深的坑：</p>
+      <p class="en">"Three problems I remember most:</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>一，脚会浮空。</strong>最早的版本脚是跟着小腿转的，人一动就'飘'。这就是刚才那个 IK 的由来。</p>
+      <p class="en"><strong>One: the foot floated.</strong> In the first version the foot simply rotated with the shin, so the moment the figure moved, it drifted. That's where the IK came from.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>二，撤销会卡死。</strong>连续拖动时每个像素都入栈，60 步一秒就满了，所以做了时间合并。合并之后还冒出个新 bug：如果在合并窗口内按撤销，那个延迟提交会把重做记录冲掉——这个我后来单独修了。</p>
+      <p class="en"><strong>Two: undo froze.</strong> While dragging, every pixel entered the stack and sixty steps filled up in a second, so I merged by time. That produced a new bug: pressing undo inside the merge window let a delayed commit wipe the redo stack — I fixed that separately.</p>
+    </div>
+    <div class="block">
+      <p class="zh"><strong>三，回放和编辑会打架。</strong>一开始允许边放边改，结果两套逻辑交替覆盖姿态，画面像坏了。最后决定：回放期间一律只读。</p>
+      <p class="en"><strong>Three: playback and editing fought.</strong> At first you could edit while it played, and the two systems overwrote each other's poses; it looked broken. The final rule: playback is strictly read-only.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>7 · 收束 <span class="time">约 30 秒</span>
+      <span class="en">Closing</span>
+    </h2>
+    <p class="cue"><span class="tag">Action</span>回到首页，让自动巡演继续跑。
+      <span class="en">Return to the homepage and let the auto-tour keep running.</span>
+    </p>
+    <div class="block">
+      <p class="zh">"总结一下。这个网站做的事其实很小：<strong>把'动作'从一个说不清的词，变成一串可以看、可以改、可以存下来的数字。</strong></p>
+      <p class="en">"To sum up. What this site does is small: <strong>it turns 'motion' from a word you can't quite say into a string of numbers you can see, change, and keep.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">三层结构对应三句话：<strong>画廊让你看见动作，游戏让你记住动作，编辑器让你造出动作。</strong></p>
+      <p class="en">Three layers, three sentences: <strong>the gallery lets you see motion, the game lets you remember it, the editor lets you make it.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">技术上它很朴素——没有框架，没有构建工具，就是 HTML、CSS、SVG 和原生 JavaScript，双击文件就能跑；五个页面、一个样式表、六个脚本，没有一行第三方依赖。</p>
+      <p class="en">Technically it's plain: no framework, no build step — HTML, CSS, SVG and vanilla JavaScript; it runs by double-clicking a file. Five pages, one stylesheet, six scripts, zero third-party dependencies.</p>
+    </div>
+    <div class="block">
+      <p class="zh">但我觉得它至少证明了一件事：<strong>最简陋的素材——几个圆、几根线——只要你愿意把它拆到关节这一层，它就能承载很复杂的东西。</strong></p>
+      <p class="en">But I think it proves one thing: <strong>the humblest material — a few circles, a few lines — can carry something complex, if you're willing to take it down to the joint.</strong></p>
+    </div>
+    <div class="block">
+      <p class="zh">谢谢大家。</p>
+      <p class="en">Thank you.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>8 · 只有 3 分钟怎么砍 <span class="time">Backup plan</span>
+      <span class="en">The 3-minute cut</span>
+    </h2>
+    <table>
+      <thead>
+        <tr><th style="width:22%">段落 / Section</th><th>处理 / What to do</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>开场<br><span class="en">Opening</span></td>
+          <td>压成两句：一句提问 + "我做了一个能把动作拆开的地方"。<span class="en">Two lines: one question, then "I made a place where motion can be taken apart."</span></td>
+        </tr>
+        <tr>
+          <td>画廊<br><span class="en">Gallery</span></td>
+          <td>只点<b>一张</b>卡片播放，不提声音。<span class="en">Play <b>one</b> card only; skip the sound toggle.</span></td>
+        </tr>
+        <tr>
+          <td>动作游戏<br><span class="en">Simulator</span></td>
+          <td>只讲规则，不实际玩（或直接跳到编辑器）。<span class="en">Explain the rules only, don't play (or skip straight to the Animator).</span></td>
+        </tr>
+        <tr>
+          <td>5.1 / 5.2<br><span class="en">Joints / IK</span></td>
+          <td><b>保留</b>：拖躯干、抬腿这两个动作必须演。<span class="en"><b>Keep</b>: the torso drag and the leg lift must be shown.</span></td>
+        </tr>
+        <tr>
+          <td>5.3 / 5.4<br><span class="en">Presets / Undo</span></td>
+          <td>各一句带过，不演。<span class="en">One sentence each, no demo.</span></td>
+        </tr>
+        <tr>
+          <td>5.5<br><span class="en">Record → save</span></td>
+          <td><b>保留完整流程</b>，这是全篇记忆点。<span class="en"><b>Keep the whole flow</b> — it's the one image people remember.</span></td>
+        </tr>
+        <tr>
+          <td>制作路程<br><span class="en">Process</span></td>
+          <td>只留"动作变成数据" + 一个坑（脚浮空）。<span class="en">Only "motion became data" + one pitfall (the floating foot).</span></td>
+        </tr>
+        <tr>
+          <td>收束<br><span class="en">Closing</span></td>
+          <td>原样念完。<span class="en">Read as written.</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>9 · 现场出问题时的救场话术 <span class="time">Fallbacks</span>
+      <span class="en">What to say when the demo misbehaves</span>
+    </h2>
+    <table>
+      <thead>
+        <tr><th style="width:30%">情况 / Situation</th><th>说什么 / Say this</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>刷新后列表空了，或录制没出现<br><span class="en">List is empty after a refresh, or the take didn't appear</span></td>
+          <td>"这正是我为什么不把数据放服务器——换浏览器就没了，是取舍不是 bug。"（然后现场重录一条 3 秒的，或播放备用片段）
+            <span class="en">"This is exactly why I don't put the data on a server — change browser and it's gone. A trade-off, not a bug." Then re-record three seconds, or play the backup take.</span></td>
+        </tr>
+        <tr>
+          <td>拖不动骨架<br><span class="en">The skeleton won't drag</span></td>
+          <td>"要先点一下这一段，它需要被选中。"<span class="en">"You have to click the segment first — it needs to be selected."</span></td>
+        </tr>
+        <tr>
+          <td>问：预设里怎么没有"挥手"？<br><span class="en">Q: why is there no "wave" preset?</span></td>
+          <td>"画廊有七个动作，编辑器只给六个预设。挥手更适合手动摆——抬前臂、转手腕，正好留给我现场做。"
+            <span class="en">"The gallery has seven motions; the editor ships six presets. A wave is better posed by hand — lift the forearm, turn the wrist — so I kept it for the live demo."</span></td>
+        </tr>
+        <tr>
+          <td>投屏太远，看不清灰掉的按钮<br><span class="en">Too far to see the greyed-out buttons</span></td>
+          <td>"我口头说明一下：回放时这些按钮会变成禁用状态。"<span class="en">"For those at the back: during playback these controls become disabled."</span></td>
+        </tr>
+        <tr>
+          <td>游戏按错太多、提前结束<br><span class="en">Too many misses, the run ends early</span></td>
+          <td>"正好，这就是三命结束；我们直接去编辑器，那里才是重点。"<span class="en">"Perfect — that's the three lives gone. Let's go straight to the Animator; that's the point anyway."</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>10 · 可能的提问与备答 <span class="time">Q&amp;A prep</span>
+      <span class="en">Likely questions and short answers</span>
+    </h2>
+    <table>
+      <thead>
+        <tr><th style="width:34%">问题 / Question</th><th>回答要点 / Answer</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>为什么不用 React / Three.js？<br><span class="en">Why not React or Three.js?</span></td>
+          <td>目标是"打开就能读、就能跑"：无依赖、无构建步骤；二维骨骼用 SVG 的 <code>transform</code> 足够表达。
+            <span class="en">The goal is a project you can open and read and run: no dependencies, no build step. SVG <code>transform</code> is enough for a 2D skeleton.</span></td>
+        </tr>
+        <tr>
+          <td>数据存在哪里？隐私呢？<br><span class="en">Where is the data? What about privacy?</span></td>
+          <td>浏览器 <code>localStorage</code>，两个键（姿势 / 录像），明文、留在本机、不上传。
+            <span class="en">Browser <code>localStorage</code>, two keys (poses / takes), plain text, local only, never uploaded.</span></td>
+        </tr>
+        <tr>
+          <td>为什么只有侧视？<br><span class="en">Why side view only?</span></td>
+          <td>侧视是动画最基础的视图，两骨 IK 在侧视下有解析解；换成正视图或三维，复杂度会立刻上一个量级。
+            <span class="en">The side view is the most basic animation view, and two-bone IK has a closed-form solution in it. A front view or 3D would raise the complexity by an order of magnitude.</span></td>
+        </tr>
+        <tr>
+          <td>最难的部分是什么？<br><span class="en">What was the hardest part?</span></td>
+          <td>不是画图，是<b>状态</b>：录制、暂停、回放、编辑四种模式必须互斥，锁的顺序错一步就会互相覆盖。
+            <span class="en">Not the drawing — the <b>state</b>: record, pause, replay and edit must be mutually exclusive; get the locking order wrong and they overwrite each other.</span></td>
+        </tr>
+        <tr>
+          <td>接下来会加什么？<br><span class="en">What comes next?</span></td>
+          <td>时间轴与曲线编辑、把录像接进画廊变成"我的作品"、导出更多格式。
+            <span class="en">A timeline with curve editing, feeding takes back into the gallery as "my work", and more export formats.</span></td>
+        </tr>
+        <tr>
+          <td>为什么是七个动作？<br><span class="en">Why seven motions?</span></td>
+          <td>"最小可玩的词汇量"：够组成 3 到 7 个动作的句子，又不至于记不住。
+            <span class="en">The smallest playable vocabulary: enough to form sentences of three to seven, few enough to remember.</span></td>
+        </tr>
+        <tr>
+          <td>无障碍做了什么？<br><span class="en">What about accessibility?</span></td>
+          <td>键盘可选中与撤销、状态用 <code>aria-live</code> 播报、跳过导航、支持"减少动态效果"、中英切换。
+            <span class="en">Keyboard selection and undo, state announced via <code>aria-live</code>, skip links, reduced-motion support, and a Chinese/English switch.</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>11 · 一页速记卡 <span class="time">Cheat sheet</span>
+      <span class="en">One page to glance at before you start</span>
+    </h2>
+    <div class="cheat">1  开场 / Opening
+   怎么"说"走路？→ 动作最难说清
+   How do you "say" walking? → motion resists words
+
+2  定位 / Position
+   五页 = 看 / 玩 / 做 三层
+   Five pages = See / Play / Make
+
+3  画廊 / Gallery
+   7 个动作 = 一套词汇
+   7 motions = one vocabulary
+
+4  游戏 / Simulator
+   3→7 个动作，3 条命，逼你记住编号
+   3→7 motions, 3 lives — it makes you remember the numbers
+
+5  编辑器 / Animator   ← 重点，一半时间 / half the talk
+   ① 拖躯干 → 孩子跟着动（层级）
+      Rotate torso → children follow (hierarchy)
+   ② 抬腿 → 脚还平、影子变（IK）
+      Lift a leg → foot stays level, shadow shifts (IK)
+   ③ 跑 0.7s / 走 1s / 跳 1.8s 只播一次（关键帧）
+      Run 0.7s / Walk 1s / Jump 1.8s once (keyframes)
+   ④ 600ms 合并（撤销不卡）
+      600ms merge (undo stays clean)
+   ⑤ 录制 → 暂停 → 继续 → 停止 → 播放 → 保存 → 刷新还在
+      Record → pause → resume → stop → play → save → still there after refresh
+   ⑥ 回放时按钮全灰（故意只读）
+      Everything greys out during playback (read-only on purpose)
+
+6  路程 / Process
+   画动作 → 变骨架（分水岭）→ 加游戏和编辑器 → 打磨
+   Draw → skeletonise (the watershed) → game & editor → polish
+   坑 / Pitfalls：脚浮空 foot floated · 撤销卡死 undo froze · 回放打架 replay fought
+
+7  收束 / Closing
+   动作 = 可看、可改、可存的数字
+   Motion = numbers you can see, change, and keep</div>
+
+    <div class="note">
+      <b>数字全部对过源码 / Every figure checked against the source：</b>
+      10 个可选部位 · 躯干 −25°~40° · 大腿 80 / 小腿 74 · 6 个预设（跑 0.7s / 走 1s / 跳 1.8s 单次）· 历史 60 步 · 拖动 600ms 合并 · 录制采样 33ms、上限 60s · 姿势库 50 / 录像库 40 · 中英文案 324 条 · 5 页 + 6 脚本 + 1 样式表 · 零第三方依赖。
+      <span class="en">Ten segments · torso −25°~40° · thigh 80 / shin 74 · six presets · 60-step history · 600 ms drag merge · 33 ms sampling, 60 s cap · 50 poses / 40 takes · 324 bilingual strings · 5 pages + 6 scripts + 1 stylesheet · zero third-party dependencies.</span>
+    </div>
+
+    <div class="foot">
+      <span>Stickman Motion Simulator · 边操作边讲解演示稿 / Live demo script</span>
+      <span>中文 / English · 约 8 分钟 / ≈ 8 min</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
